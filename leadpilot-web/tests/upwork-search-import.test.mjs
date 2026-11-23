@@ -1,0 +1,5 @@
+﻿import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {parseUpworkSearchUrl} from '../resources/js/upworkSearchImport.mjs';
+test('reads selected ranges and preserves broad regions for review',()=>{const x=parseUpworkSearchUrl('https://www.upwork.com/nx/search/jobs?amount=0-99,100-499,500-999&hourly_rate=10-&client_hires=1-9,10-&location=Americas,Europe,Australia%2520and%2520New%2520Zealand&payment_verified=1&q=shopify%20dropshipping');assert.deepEqual(x.fixedRanges,['0-99','100-499','500-999']);assert.equal(x.hourlyMinimum,'10');assert.equal(x.regions[2],'Australia and New Zealand');assert.equal(x.verified,true);assert.equal(x.query,'shopify dropshipping')});
+test('rejects non-Upwork URLs and refuses unsupported hourly ranges',()=>{assert.throws(()=>parseUpworkSearchUrl('https://upwork.com.evil.test/nx/search/jobs'));const x=parseUpworkSearchUrl('https://www.upwork.com/nx/search/jobs?hourly_rate=10-20');assert.equal(x.hourlyMinimum,'');assert.ok(x.warnings.length)});

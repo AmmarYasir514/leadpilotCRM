@@ -1,0 +1,608 @@
+# LEADPILOT CRM 2.0 — SUPER ADMIN, USER MANAGEMENT & ACTIVITY MONITORING
+
+## IMPORTANT ARCHITECTURAL UPDATE
+
+Implement a comprehensive Super Admin management system as a core feature of LeadPilot CRM 2.0.
+
+The Super Admin must have centralized control over all users, roles, permissions, CRM modules, lead assignments, sales activities, reports, and organization settings.
+
+This functionality must be implemented starting in Phase 1, not postponed until the final phases.
+
+All user activities must be linked to authenticated user accounts so the Super Admin can review individual and team performance.
+
+---
+
+# PHASE 1 — SUPER ADMIN & AUTHENTICATION
+
+## 1. SUPER ADMIN ACCOUNT
+
+Create a protected Super Admin role.
+
+The initial Super Admin account must be created securely through an installation command or controlled setup process.
+
+Never hardcode default production credentials.
+
+The Super Admin can:
+
+- Create new users
+- Edit existing users
+- Activate or deactivate users
+- Suspend user accounts
+- Reset user passwords securely
+- Assign and remove roles
+- Configure permissions
+- Assign users to teams
+- View all users
+- View all leads and proposals
+- View all sales pipelines
+- View all follow-ups
+- View all meetings
+- View all user activities
+- View individual performance
+- View organization-wide reports
+- Configure CRM settings
+- Manage AI agent permissions
+- Manage external integrations
+- Export authorized business reports
+- Review security and audit logs
+
+The Super Admin role must be protected against accidental deletion or removal of the last active Super Admin.
+
+For a future multi-tenant SaaS, distinguish between Platform Super Admin and Organization Admin. Platform Super Admin privileges must not automatically expose unrelated tenant business data.
+
+## 2. USER MANAGEMENT
+
+Create a dedicated Super Admin page:
+
+Admin Panel → User Management
+
+### User Fields
+
+- Full name
+- Email address
+- Phone number
+- Profile photo
+- Job title
+- Department
+- Assigned role
+- Assigned team
+- Account status
+- Joining date
+- Last login
+- Last activity
+- Created by
+- Created date
+- Updated date
+
+### User Actions
+
+Super Admin must be able to:
+
+1. Create user
+2. Edit user
+3. Activate user
+4. Suspend user
+5. Deactivate user
+6. Send password setup invitation
+7. Initiate password reset
+8. Assign role
+9. Assign team
+10. Change permissions
+11. View user profile
+12. View activity history
+13. View sales performance
+14. Reassign leads and tasks
+15. Revoke active sessions
+16. Archive user
+
+Use soft deletion or archival where needed to preserve historical sales records.
+
+---
+
+# PHASE 2 — ROLE-BASED ACCESS CONTROL
+
+Implement dynamic Role-Based Access Control (RBAC).
+
+Default roles:
+
+1. Super Admin
+2. Admin
+3. Sales Manager
+4. Business Development Executive
+5. Sales Representative
+6. Viewer
+
+Super Admin must be able to create custom roles.
+
+## Permission Management
+
+Create a permission matrix where Super Admin can configure permissions for each role or individual user.
+
+Permissions must support:
+
+- View
+- Create
+- Edit
+- Delete
+- Export
+- Import
+- Assign
+- Approve
+- Manage
+
+## Module Permissions
+
+Configure access independently for:
+
+- Dashboard
+- Leads
+- Sales Pipeline
+- Clients
+- Upwork Jobs
+- Proposals
+- Bidding Records
+- Follow-ups
+- Tasks
+- Meetings
+- AI Lead Generation
+- AI Sales Agent
+- Analytics
+- Reports
+- Team Management
+- Integrations
+- Settings
+- User Management
+- Audit Logs
+
+## Record-Level Permissions
+
+Support these access scopes:
+
+- Own records only
+- Assigned records
+- Team records
+- Organization records
+- All permitted records
+
+Example:
+
+A Sales Representative can view and update only assigned leads.
+
+A Sales Manager can view all leads and activities belonging to their team.
+
+An Admin can manage organization-wide CRM records.
+
+A Super Admin can access all records within their authorized administrative scope.
+
+All permissions must be enforced in Laravel backend policies and database queries.
+
+Hiding a frontend button is not sufficient security.
+
+Permission changes must take effect promptly, including for already logged-in users.
+
+---
+
+# PHASE 3 — SUPER ADMIN DASHBOARD
+
+Create a separate dashboard accessible only to authorized administrators.
+
+## Dashboard KPI Cards
+
+Display:
+
+- Total Users
+- Active Users
+- Suspended Users
+- Users Active Today
+- Total Leads
+- Leads Added Today
+- Total Proposals
+- Proposals Submitted Today
+- Follow-ups Due
+- Overdue Follow-ups
+- Meetings Scheduled
+- Interviews Booked
+- Deals Won
+- Deals Lost
+- Total Revenue
+- Monthly Sales Target
+- Team Conversion Rate
+
+Support filters by date range, user, team, source, and sales stage.
+
+## Employee Performance Table
+
+Display:
+
+| Employee | Leads | Proposals | Follow-ups | Interviews | Won Deals |
+|---|---:|---:|---:|---:|---:|
+| Sales User A | 45 | 28 | 18 | 7 | 3 |
+| Sales User B | 38 | 24 | 15 | 5 | 2 |
+| Sales User C | 52 | 35 | 23 | 9 | 4 |
+
+These are illustrative values only. Actual dashboard values must come from the database.
+
+Allow the Super Admin to click an employee and open their complete performance profile.
+
+---
+
+# PHASE 4 — USER ACTIVITY MONITORING
+
+Implement a comprehensive employee activity tracking system.
+
+The Super Admin must be able to see what each employee has done inside LeadPilot CRM.
+
+## Track These Activities
+
+### Authentication
+
+- Login time
+- Logout time
+- Last activity timestamp
+- Failed login attempts
+- Account suspension events
+
+### Leads
+
+- Lead created
+- Lead updated
+- Lead assigned
+- Lead reassigned
+- Lead status changed
+- Lead archived
+- Lead converted to opportunity
+
+### Proposals
+
+- Proposal created
+- Proposal edited
+- Proposal approved
+- Proposal marked as submitted
+- Proposal status changed
+- Bid amount changed
+- Proposal outcome recorded
+
+### Follow-ups
+
+- Follow-up scheduled
+- Follow-up completed
+- Follow-up missed
+- Follow-up rescheduled
+- Follow-up cancelled
+- Follow-up note added
+
+### Meetings
+
+- Meeting created
+- Meeting updated
+- Meeting cancelled
+- Meeting completed
+- Meeting outcome recorded
+
+### AI Agent
+
+- AI lead analysis requested
+- AI proposal generated
+- AI follow-up draft created
+- AI recommendation accepted
+- AI recommendation rejected
+- Approved AI action executed
+
+## Activity Timeline
+
+Create an employee activity timeline.
+
+Example:
+
+09:15 AM — User logged in
+
+09:30 AM — Created new lead
+
+10:10 AM — Generated AI proposal draft
+
+10:25 AM — Marked proposal as submitted
+
+11:40 AM — Completed client follow-up
+
+02:00 PM — Attended scheduled meeting
+
+03:20 PM — Updated opportunity status
+
+Use actual event timestamps and the user's configured timezone.
+
+## Activity Monitoring Rules
+
+- Track meaningful CRM business events.
+- Store actor, action, record type, record ID, timestamp, and relevant changes.
+- Do not store passwords, access tokens, or confidential message contents in audit logs.
+- Do not use hidden screenshots, keystroke logging, or invasive computer monitoring.
+- Provide clear employee-facing information about activity logging.
+- Allow authorized administrators to filter and export activity records.
+- Keep audit logs protected from ordinary users.
+- Define configurable retention periods.
+- Preserve important audit events against unauthorized alteration.
+
+Do not interpret login duration as actual productive working time.
+
+---
+
+# PHASE 5 — EMPLOYEE PERFORMANCE MANAGEMENT
+
+Create a performance dashboard for every employee.
+
+## Performance Metrics
+
+- Leads created
+- Leads qualified
+- Proposals prepared
+- Proposals submitted
+- Interviews scheduled
+- Follow-ups completed
+- Follow-ups overdue
+- Deals won
+- Deals lost
+- Revenue generated
+- Proposal response rate
+- Interview conversion rate
+- Win rate
+- Average response time
+- Average sales cycle
+- Monthly target achievement
+
+## Employee Targets
+
+Super Admin and authorized managers can assign:
+
+- Daily lead target
+- Weekly proposal target
+- Monthly proposal target
+- Follow-up completion target
+- Interview target
+- Revenue target
+- Deal closing target
+
+Targets must be stored in the database.
+
+Provide progress charts and comparisons against previous periods.
+
+## Performance Reports
+
+Allow Super Admin to generate:
+
+- Daily employee activity report
+- Weekly employee performance report
+- Monthly employee performance report
+- Team performance report
+- Sales conversion report
+- Proposal productivity report
+- Follow-up completion report
+- Revenue contribution report
+
+Support PDF, Excel, and CSV exports.
+
+---
+
+# PHASE 6 — LEAD & TASK ASSIGNMENT
+
+Super Admin and authorized managers must be able to assign work to users.
+
+## Lead Assignment
+
+Support:
+
+- Manual lead assignment
+- Bulk lead assignment
+- Reassignment
+- Team-based assignment
+- Round-robin assignment
+- Workload-based assignment
+- Assignment history
+- Assignment notifications
+
+## Task Assignment
+
+Create tasks with:
+
+- Title
+- Description
+- Assigned user
+- Related lead
+- Related proposal
+- Priority
+- Due date
+- Status
+- Notes
+- Attachments
+
+Statuses:
+
+- Pending
+- In Progress
+- Completed
+- Overdue
+- Cancelled
+
+The Super Admin can view task completion across all authorized teams.
+
+---
+
+# PHASE 7 — AI AGENT PERMISSIONS
+
+Super Admin must control access to AI features.
+
+## Configurable AI Permissions
+
+- Access AI Sales Agent
+- Use AI Lead Generation
+- Analyze Upwork Jobs
+- Generate Proposal Drafts
+- Generate Follow-up Drafts
+- Run Lead Scoring
+- Execute Approved Internal CRM Actions
+- Manage AI Templates
+- View AI Usage
+- Manage AI Providers
+- Configure AI Budgets
+
+## AI Usage Monitoring
+
+Display:
+
+- User
+- AI feature
+- Number of requests
+- Model used
+- Token usage
+- Estimated API cost
+- Execution status
+- Date and time
+
+Support daily and monthly AI usage limits per user or team.
+
+The Super Admin can disable AI access for specific users.
+
+AI agents must never bypass user permissions or access records outside their authorized scope.
+
+---
+
+# PHASE 8 — DATABASE UPDATES
+
+Add or extend the following tables:
+
+- users
+- roles
+- permissions
+- role_permissions
+- user_roles
+- user_permission_overrides
+- teams
+- team_members
+- user_sessions
+- user_invitations
+- user_activity_logs
+- audit_logs
+- user_targets
+- user_performance_snapshots
+- lead_assignments
+- task_assignments
+- ai_usage_logs
+- user_notification_preferences
+
+Include appropriate:
+
+- Foreign keys
+- Indexes
+- Unique constraints
+- Timestamps
+- Organization ownership
+- Soft deletes where appropriate
+
+Use normalized relationships.
+
+Maintain historical records even when employees are deactivated.
+
+---
+
+# PHASE 9 — SUPER ADMIN UI/UX
+
+Build a dedicated administration area using React, TypeScript, and Tailwind CSS.
+
+## Admin Sidebar
+
+- Admin Overview
+- User Management
+- Roles & Permissions
+- Teams
+- Employee Activity
+- Employee Performance
+- Lead Assignments
+- Task Management
+- AI Usage & Limits
+- Reports
+- Audit Logs
+- System Settings
+
+## User Management Screen
+
+Include:
+
+- Searchable user table
+- User status badges
+- Role filters
+- Team filters
+- Create User button
+- Edit User drawer
+- Role assignment modal
+- Permission matrix
+- User profile page
+- Activity timeline
+- Performance charts
+- Suspend/Activate actions
+
+## Design Requirements
+
+- Premium SaaS appearance
+- Responsive layouts
+- Light and dark themes
+- Tailwind CSS
+- Modern reusable components
+- Accessible forms
+- Clear status indicators
+- Smooth interactions
+- Loading skeletons
+- Confirmation dialogs
+- Success and error notifications
+
+All UI elements must connect to real backend functionality.
+
+---
+
+# PHASE 10 — SECURITY & TESTING
+
+Implement tests for:
+
+1. Super Admin can create users.
+2. Super Admin can edit users.
+3. Super Admin can suspend users.
+4. Suspended users cannot access protected routes.
+5. Role permissions are enforced.
+6. Users cannot escalate their own privileges.
+7. Sales users cannot access restricted admin pages.
+8. Sales users cannot access unauthorized leads.
+9. Managers can access authorized team records.
+10. Super Admin can review employee activity.
+11. Activity logs record the correct actor.
+12. Sensitive values are excluded from logs.
+13. User reassignment preserves history.
+14. AI agents respect user permissions.
+15. Organization data remains isolated.
+16. Last active Super Admin cannot be accidentally removed.
+17. Permission changes invalidate stale access.
+18. Exports respect authorization rules.
+
+## FINAL REQUIREMENT
+
+The Super Admin system must be fully functional and database-driven.
+
+No hardcoded users, roles, permissions, performance statistics, or activity records.
+
+The Super Admin must be able to manage the entire authorized CRM workspace through the interface without modifying source code.
+
+## IMPLEMENTATION ORDER
+
+Update the original LeadPilot CRM 2.0 development roadmap as follows:
+
+1. Foundation, Database, Authentication & Super Admin
+2. Dynamic Roles, Permissions & Team Management
+3. Leads, Clients & Sales Pipeline
+4. Upwork Jobs, Proposals & Bidding Records
+5. Follow-ups, Tasks & Meetings
+6. AI Lead Generation
+7. AI Sales Agent & Proposal Intelligence
+8. Employee Activity & Performance Analytics
+9. Reports, Integrations & SaaS Readiness
+10. Security, QA, Data Migration & Cloudways Deployment
+
+Start with Phase 1.
+
+Do not proceed to the next phase until the current phase is implemented, tested, and approved.

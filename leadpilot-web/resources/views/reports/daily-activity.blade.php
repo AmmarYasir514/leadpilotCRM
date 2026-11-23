@@ -1,0 +1,4 @@
+﻿<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Daily recorded activity</title><style>body{font-family:DejaVu Sans,sans-serif;font-size:12px;color:#17233b}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}</style></head><body>
+<h1>Daily recorded activity report</h1><p>Employee: {{ $report['employee_name'] }}</p><p>Date: {{ $report['date'] }} ({{ $report['timezone'] }})</p><p>Recorded events: {{ $report['total'] }}. Previous day: {{ $report['previous_day_total'] }}.</p><p>Security and administration events only. This is not a measure of productivity or sales.</p><table><thead><tr><th>Action</th><th>Events</th></tr></thead><tbody>@foreach ($report['actions'] as $action)<tr><td>{{ $action['action'] }}</td><td>{{ $action['event_count'] }}</td></tr>@endforeach</tbody></table>
+</body></html>

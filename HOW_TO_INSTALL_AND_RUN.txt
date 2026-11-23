@@ -1,0 +1,70 @@
+﻿LEADPILOT - HOW TO INSTALL AND RUN ON A NEW COMPUTER
+(Package made Nov 17, 2026)
+
+This folder holds the LeadPilot program files only. It has no data from
+any other computer. Each computer gets its own fresh, empty database.
+
+1. WHAT TO COPY
+- Copy this whole folder (or the .zip, then unzip it) to the new computer.
+  A good place is Documents, for example: Documents\LeadPilot
+- Keep all the files together in one folder. The app needs all of them.
+
+2. WHAT TO INSTALL FIRST
+a) Python 3.10 or newer (Windows 10 or 11).
+   - Easiest way: double-click Setup_LeadPilot.bat. If Python is missing,
+     it tries to install it for you. Then close it and run it again.
+   - Or install it yourself from https://www.python.org/downloads/windows/
+     and tick "Add Python to PATH" during install.
+   - Tkinter and SQLite come with Python, so nothing extra is needed for them.
+b) Extra libraries. Open Command Prompt and run these once:
+     python -m pip install keyring
+       (needed for the API Key page, the saved Upwork login and
+        Google Calendar; these are kept in Windows Credential Manager)
+     python -m pip install sounddevice numpy
+       (only needed for the mic button / voice instructions)
+   The rest of the app works without these, but the AI proposal
+   writer needs keyring to keep your OpenAI key.
+
+3. HOW TO START THE APP
+- First time: double-click Setup_LeadPilot.bat. It checks Python and
+  Tkinter, then opens LeadPilot.
+- Every time after that: double-click Run_LeadPilot_CRM.bat.
+- Tip: right-click Run_LeadPilot_CRM.bat > Send to > Desktop (create
+  shortcut) to start it from the Desktop.
+
+4. WHERE THE DATABASE IS CREATED
+- The first time LeadPilot opens, it creates a new empty database here:
+    C:\Users\<your Windows user name>\LeadPilotCRM\leadpilot.db
+  (the same as %USERPROFILE%\LeadPilotCRM\)
+- Reports and safety backups are saved in that same LeadPilotCRM folder.
+- The Data & Backup page in the app shows the exact location.
+- Nothing from the main computer's database is copied. To move records
+  later, use Data & Backup (export and import, or backup and restore).
+
+5. FIRST-TIME SETUP
+a) Open LeadPilot and check that the Overview page loads (it will be empty).
+b) API Key page (left menu): paste your OpenAI key, press Test key, then
+   save it. The key is kept in Windows Credential Manager on that computer,
+   not in any file. Keys and logins do not move with this folder, so add
+   them again on each new computer.
+c) Settings page: check your settings and targets.
+d) Optional: Upwork Connection page (or Upwork_Login_Setup.bat) to save
+   your Upwork login in the Windows vault.
+e) Optional: Meetings page > Connect Google Calendar (needs your own
+   Google OAuth client file, see README.txt).
+f) Make a first backup from Data & Backup once you have added some records.
+
+6. GOOD TO KNOW
+- LeadPilot only reads from Upwork. It never sends, submits or clicks
+  anything there. Proposals are drafts you copy yourself.
+- Each computer keeps its own data. There is no sync between computers.
+- README.txt has the full list of pages and features. The QA tools it
+  mentions are not part of this package.
+- Never type passwords or keys into notes or CSV files.
+
+7. IF SOMETHING GOES WRONG
+- "Python was not found": install Python (step 2a) and tick "Add Python
+  to PATH", then run Setup_LeadPilot.bat again.
+- "Tkinter is missing": reinstall Python from python.org with Tcl/Tk on.
+- The mic does not work: run  python -m pip install sounddevice numpy
+- The API key cannot be saved: run  python -m pip install keyring

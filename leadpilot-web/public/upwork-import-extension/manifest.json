@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "LeadPilot local job import",
+  "version": "1.0.0",
+  "description": "Read an Upwork job page only when requested from the local LeadPilot preview.",
+  "permissions": ["tabs", "scripting", "storage"],
+  "host_permissions": ["https://www.upwork.com/*", "https://upwork.com/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["http://127.0.0.1/*"],
+    "js": ["bridge.js"]
+  }, {
+    "matches": ["https://www.upwork.com/*", "https://upwork.com/*"],
+    "js": ["upwork-button.js"]
+  }]
+}
