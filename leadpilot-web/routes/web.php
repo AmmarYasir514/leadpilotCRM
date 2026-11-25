@@ -46,7 +46,7 @@ Route::middleware(['auth', EnsureActiveUser::class])->group(function (): void {
     Route::post('/ai-writer/transcribe', [AiWriterController::class, 'transcribe'])->middleware('throttle:10,1');
     Route::get('/upwork/mcp/status', [UpworkMcpController::class, 'status']);
     Route::get('/upwork/mcp/capabilities', [UpworkMcpController::class, 'capabilities'])->middleware('throttle:10,1');
-    Route::post('/upwork/mcp/send-message', [UpworkMcpController::class, 'capabilities'])->middleware('throttle:10,1');
+    Route::post('/upwork/mcp/send-message', [UpworkMcpController::class, 'sendMessage'])->middleware('throttle:10,1');
     Route::get('/upwork/mcp/saved-profile', [UpworkMcpController::class, 'savedProfile']);
     Route::post('/upwork/mcp/saved-profile', [UpworkMcpController::class, 'syncProfile'])->middleware('throttle:10,1');
     Route::delete('/upwork/mcp/saved-profile', [UpworkMcpController::class, 'deleteProfile']);

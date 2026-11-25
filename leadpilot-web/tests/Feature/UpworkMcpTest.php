@@ -41,6 +41,18 @@ class UpworkMcpTest extends TestCase
         Http::assertSent(fn ($request) => data_get($request->data(), 'params.name') === 'upwork__send_message' && data_get($request->data(), 'params.arguments.params.message') === 'Example');
     }
 
+    public function test_send_message_route_never_returns_other_upwork_views(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake();
+        $org = DB::table('organizations')->insertGetId(['name' => 'Example', 'created_at' => now(), 'updated_at' => now()]);
+        $user = User::factory()->create(['organization_id' => $org, 'is_super_admin' => true]);
+        DB::table('upwork_mcp_connections')->insert(['organization_id' => $org, 'user_id' => $user->id, 'client_id' => Crypt::encryptString('client'), 'access_token' => Crypt::encryptString('secret'), 'created_at' => now(), 'updated_at' => now()]);
+        $this->withSession(['session_version' => 0])->actingAs($user)->postJson('/upwork/mcp/send-message', ['view' => 'jobs'])->assertUnprocessable()->assertJsonValidationErrors(['room_id', 'message', 'confirmed']);
+        $this->postJson('/upwork/mcp/send-message', [])->assertUnprocessable();
+        Http::assertNothingSent();
+    }
+
     public function test_profile_sync_is_private_encrypted_and_removed_on_disconnect(): void
     {
         Http::preventStrayRequests();

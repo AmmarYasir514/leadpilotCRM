@@ -202,6 +202,14 @@ class UpworkMcpController extends Controller
         return response()->json(['message' => 'Saved Upwork profile removed.']);
     }
 
+    public function sendMessage(Request $request): JsonResponse
+    {
+        // This route can only ever send a message, never return other Upwork data.
+        $request->merge(['view' => 'send-message']);
+
+        return $this->capabilities($request);
+    }
+
     public function capabilities(Request $request): JsonResponse
     {
         $this->authorizeUser($request);
