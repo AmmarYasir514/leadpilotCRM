@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class GoogleCalendarController extends Controller
@@ -79,6 +80,7 @@ class GoogleCalendarController extends Controller
         try {
             $response = Http::asForm()->timeout(20)->post('https://oauth2.googleapis.com/token', ['code' => $request->input('code'), 'client_id' => $config['client_id'], 'client_secret' => $config['client_secret'], 'redirect_uri' => $config['redirect_uri'], 'grant_type' => 'authorization_code', 'code_verifier' => $saved['verifier']]);
         } catch (\Throwable $e) {
+            Log::error('Google Calendar token exchange failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             return redirect('/?calendar=failed');
         }
         $refresh = $response->json('refresh_token');
@@ -98,6 +100,7 @@ class GoogleCalendarController extends Controller
         try {
             $response = Http::asForm()->timeout(20)->post('https://oauth2.googleapis.com/token', ['client_id' => $config['client_id'], 'client_secret' => $config['client_secret'], 'refresh_token' => Crypt::decryptString($connection->encrypted_refresh_token), 'grant_type' => 'refresh_token']);
         } catch (\Throwable $e) {
+            Log::error('Google Calendar token refresh failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             abort(502, 'Could not connect to Google Calendar.');
         }
         abort_unless($response->successful() && is_string($response->json('access_token')), 502, 'Google Calendar authorization failed. Please reconnect.');
@@ -112,6 +115,7 @@ class GoogleCalendarController extends Controller
         try {
             $response = Http::withToken($token)->timeout(20)->get('https://www.googleapis.com/calendar/v3/calendars/primary/events', ['timeMin' => now()->subDays(7)->toRfc3339String(), 'timeMax' => now()->addDays(60)->toRfc3339String(), 'singleEvents' => 'true', 'orderBy' => 'startTime', 'maxResults' => 100]);
         } catch (\Throwable $e) {
+            Log::error('Google Calendar events request failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             abort(502, 'Could not load calendar events.');
         }
         abort_unless($response->successful(), 502, 'Google Calendar could not load events.');
@@ -131,6 +135,7 @@ class GoogleCalendarController extends Controller
         try {
             $response = Http::withToken($token)->timeout(20)->post('https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=none', $body);
         } catch (\Throwable $e) {
+            Log::error('Google Calendar event create failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             abort(502, 'Could not create the calendar event. Check Google Calendar before retrying.');
         }
         abort_unless($response->successful(), 502, 'Google Calendar could not create the event.');

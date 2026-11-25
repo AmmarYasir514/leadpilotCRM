@@ -8,7 +8,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use OpenSpout\Reader\XLSX\Reader;
 use Smalot\PdfParser\Parser;
@@ -48,6 +50,7 @@ class PortfolioProjectController extends Controller
         } catch (ValidationException $exception) {
             throw $exception;
         } catch (\Throwable $exception) {
+            Log::warning('Portfolio PDF could not be parsed', ['error' => $exception::class, 'detail' => Str::limit($exception->getMessage(), 200)]);
             throw ValidationException::withMessages(['pdf' => 'Could not read this PDF. Check that it is a valid, unlocked PDF.']);
         }
         if ($text === '') {
@@ -129,6 +132,7 @@ class PortfolioProjectController extends Controller
             }
             unset($row);
         } catch (\Throwable $exception) {
+            Log::warning('Portfolio import file could not be read', ['error' => $exception::class, 'detail' => Str::limit($exception->getMessage(), 200)]);
             throw ValidationException::withMessages(['file' => 'Could not read this file. Use a valid UTF-8 CSV or XLSX with at most 500 rows and 50 columns.']);
         }
         if (count($rows) < 2) {

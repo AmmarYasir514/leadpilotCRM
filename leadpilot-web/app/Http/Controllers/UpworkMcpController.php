@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UpworkMcpController extends Controller
@@ -111,6 +112,7 @@ class UpworkMcpController extends Controller
         try {
             $reg = Http::timeout(15)->acceptJson()->post(self::REGISTRATION, ['client_name' => 'LeadPilot CRM', 'redirect_uris' => [$redirect], 'grant_types' => ['authorization_code', 'refresh_token'], 'response_types' => ['code'], 'token_endpoint_auth_method' => 'none']);
         } catch (\Throwable $e) {
+            Log::error('Upwork MCP client registration failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             return redirect('/?upwork_mcp=unavailable');
         }
         $client = $reg->json('client_id');
@@ -136,6 +138,7 @@ class UpworkMcpController extends Controller
         try {
             $res = Http::asForm()->timeout(20)->post(self::TOKEN, ['grant_type' => 'authorization_code', 'client_id' => $saved['client_id'], 'redirect_uri' => $saved['redirect'], 'code' => $code, 'code_verifier' => $saved['verifier']]);
         } catch (\Throwable $e) {
+            Log::error('Upwork MCP token exchange failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             return redirect('/?upwork_mcp=failed');
         }
         $access = $res->json('access_token');
@@ -271,6 +274,7 @@ class UpworkMcpController extends Controller
                     try {
                         $sent = $call('upwork__send_message', ['action' => 'send', 'org_uid' => $org, 'params' => ['room_id' => $request->input('room_id'), 'message' => $request->input('message')]]);
                     } catch (\Throwable $e) {
+                        Log::error('Upwork send_message call failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
                         return response()->json(['message' => 'Upwork did not confirm delivery. Check the conversation on Upwork before trying again.'], 502);
                     }
                     if (($sent['status'] ?? null) !== 'success') {
@@ -368,6 +372,7 @@ class UpworkMcpController extends Controller
 
             return response()->json(['tools' => array_values(array_filter(array_map(fn ($tool) => is_array($tool) ? ($tool['name'] ?? null) : null, $tools), 'is_string'))]);
         } catch (\Throwable $e) {
+            Log::error('Upwork MCP request failed', ['error' => $e::class, 'detail' => Str::limit($e->getMessage(), 200)]);
             return response()->json(['message' => 'Unable to reach Upwork. Please try again.'], 502);
         }
     }
