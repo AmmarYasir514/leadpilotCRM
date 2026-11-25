@@ -31,6 +31,62 @@ class UpworkMcpController extends Controller
         return ['organization_id' => $request->user()->organization_id, 'user_id' => $request->user()->id];
     }
 
+    public function jobPreferences(Request $request): JsonResponse
+    {
+        $this->authorizeUser($request);
+        $saved = DB::table('upwork_job_preferences')->where($this->identity($request))->first();
+
+        return response()->json(['preferences' => $saved ? json_decode($saved->preferences, true) : null])->header('Cache-Control', 'no-store');
+    }
+
+    public function saveJobPreferences(Request $request): JsonResponse
+    {
+        $this->authorizeUser($request);
+        $validated = $request->validate([
+            'preferences' => ['required', 'array:keywords,targetSkills,countries,fixedMinimum,hourlyMinimum,weights,importedSearch,prioritizeHighScore,autoRefresh'],
+            'preferences.keywords' => ['nullable', 'string', 'max:2000'],
+            'preferences.targetSkills' => ['nullable', 'string', 'max:2000'],
+            'preferences.countries' => ['required', 'string', 'max:2000'],
+            'preferences.fixedMinimum' => ['required', 'string', 'max:30'],
+            'preferences.hourlyMinimum' => ['required', 'string', 'max:30'],
+            'preferences.prioritizeHighScore' => ['sometimes', 'boolean'],
+            'preferences.autoRefresh' => ['sometimes', 'boolean'],
+            'preferences.weights' => ['required', 'array:skills,budget,competition,age'],
+            'preferences.weights.skills' => ['required', 'numeric', 'min:0', 'max:100'],
+            'preferences.weights.budget' => ['required', 'numeric', 'min:0', 'max:100'],
+            'preferences.weights.competition' => ['required', 'numeric', 'min:0', 'max:100'],
+            'preferences.weights.age' => ['required', 'numeric', 'min:0', 'max:100'],
+            'preferences.importedSearch' => ['nullable', 'array:query,fixedRanges,hourlyMinimum,regions,hires,proposals,experience,verified,sort,jobTypes,warnings'],
+            'preferences.importedSearch.query' => ['nullable', 'string', 'max:2000'],
+            'preferences.importedSearch.fixedRanges' => ['nullable', 'array', 'max:50'],
+            'preferences.importedSearch.fixedRanges.*' => ['string', 'max:100'],
+            'preferences.importedSearch.hourlyMinimum' => ['nullable', 'string', 'max:30'],
+            'preferences.importedSearch.regions' => ['nullable', 'array', 'max:50'],
+            'preferences.importedSearch.regions.*' => ['string', 'max:100'],
+            'preferences.importedSearch.hires' => ['nullable', 'string', 'max:100'],
+            'preferences.importedSearch.proposals' => ['nullable', 'string', 'max:100'],
+            'preferences.importedSearch.experience' => ['nullable', 'string', 'max:100'],
+            'preferences.importedSearch.verified' => ['nullable', 'boolean'],
+            'preferences.importedSearch.sort' => ['nullable', 'string', 'max:100'],
+            'preferences.importedSearch.jobTypes' => ['nullable', 'string', 'max:200'],
+            'preferences.importedSearch.warnings' => ['nullable', 'array', 'max:50'],
+            'preferences.importedSearch.warnings.*' => ['string', 'max:500'],
+        ]);
+
+        $identity = $this->identity($request);
+        DB::transaction(function () use ($identity, $validated): void {
+            $saved = DB::table('upwork_job_preferences')->where($identity)->lockForUpdate()->first();
+            $values = ['preferences' => json_encode($validated['preferences'], JSON_THROW_ON_ERROR), 'updated_at' => now()];
+            if ($saved) {
+                DB::table('upwork_job_preferences')->where('id', $saved->id)->update($values);
+            } else {
+                DB::table('upwork_job_preferences')->insert($identity + $values + ['created_at' => now()]);
+            }
+        });
+
+        return response()->json(['preferences' => $validated['preferences']]);
+    }
+
     private function redirectUri(Request $request): string
     {
         $root = rtrim(config('app.url'), '/');

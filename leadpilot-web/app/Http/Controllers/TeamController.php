@@ -40,12 +40,12 @@ class TeamController extends Controller
         $actor = $this->actor($request, 'view');
 
         $scopes = app(PermissionResolver::class)->scopes($actor, 'team_management', 'view', $actor->organization_id);
-        $query = DB::table('teams')->where('organization_id', $actor->organization_id);
+        $query = DB::table('teams')->where('teams.organization_id', $actor->organization_id);
         if (! in_array('organization', $scopes, true)) {
-            $query->where('id', $actor->team_id);
+            $query->where('teams.id', $actor->team_id);
         }
 
-        return response()->json($query->orderBy('name')->get());
+        return response()->json($query->leftJoin('users as leads', 'teams.team_lead_id', '=', 'leads.id')->select('teams.*', 'leads.name as team_lead_name')->selectSub(fn ($members) => $members->from('users')->selectRaw('count(*)')->whereColumn('users.team_id', 'teams.id'), 'member_count')->orderBy('teams.name')->get());
     }
 
     public function history(Request $request, int $userId): JsonResponse
@@ -66,22 +66,25 @@ class TeamController extends Controller
     public function store(Request $request): JsonResponse
     {
         $actor = $this->actor($request, 'create');
-        $data = $request->validate(['name' => ['required', 'string', 'max:255', Rule::unique('teams')->where('organization_id', $actor->organization_id)]]);
+        $data = $request->validate(['name' => ['required', 'string', 'max:255', Rule::unique('teams')->where('organization_id', $actor->organization_id)], 'team_lead_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('organization_id', $actor->organization_id)]]);
         $id = DB::transaction(function () use ($actor, $data): int {
             $this->lockAuthorizedActor($actor, 'create');
-            $id = DB::table('teams')->insertGetId(['organization_id' => $actor->organization_id, 'name' => $data['name'], 'created_at' => now(), 'updated_at' => now()]);
+            $id = DB::table('teams')->insertGetId(['organization_id' => $actor->organization_id, 'name' => $data['name'], 'team_lead_id' => null, 'created_at' => now(), 'updated_at' => now()]);
+            if (! empty($data['team_lead_id'])) {
+                $this->assignLead($actor, $id, (int) $data['team_lead_id']);
+            }
             $this->audit($actor, $id, 'team.created');
 
             return $id;
         });
 
-        return response()->json(['id' => $id, 'name' => $data['name']], 201);
+        return response()->json(['id' => $id, 'name' => $data['name'], 'team_lead_id' => $data['team_lead_id'] ?? null], 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
         $actor = $this->actor($request, 'edit');
-        $data = $request->validate(['name' => ['required', 'string', 'max:255', Rule::unique('teams')->where('organization_id', $actor->organization_id)->ignore($id)]]);
+        $data = $request->validate(['name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('teams')->where('organization_id', $actor->organization_id)->ignore($id)], 'team_lead_id' => ['sometimes', 'nullable', 'integer', Rule::exists('users', 'id')->where('organization_id', $actor->organization_id)]]);
         DB::transaction(function () use ($actor, $id, $data): void {
             $this->lockAuthorizedActor($actor, 'edit');
             $current = User::where('organization_id', $actor->organization_id)->whereKey($actor->id)->lockForUpdate()->firstOrFail();
@@ -92,11 +95,37 @@ class TeamController extends Controller
             }
             $team = $query->lockForUpdate()->first();
             abort_unless($team, 404);
-            DB::table('teams')->where('id', $id)->update(['name' => $data['name'], 'updated_at' => now()]);
-            $this->audit($actor, $id, 'team.renamed');
+            $updates = ['updated_at' => now()];
+            if (isset($data['name'])) {
+                $updates['name'] = $data['name'];
+            }
+            if (array_key_exists('team_lead_id', $data)) {
+                if ($data['team_lead_id'] !== null) {
+                    $this->assignLead($actor, $id, (int) $data['team_lead_id']);
+                } else {
+                    DB::table('teams')->where('id', $id)->update(['team_lead_id' => null]);
+                }
+            }
+            DB::table('teams')->where('id', $id)->update($updates);
+            $auditAction = isset($data['name']) && array_key_exists('team_lead_id', $data) ? 'team.updated' : (isset($data['name']) ? 'team.renamed' : 'team.lead_changed');
+            $this->audit($actor, $id, $auditAction);
         });
 
         return response()->json(['message' => 'Team updated.']);
+    }
+
+    private function assignLead(User $actor, int $teamId, int $userId): void
+    {
+        $user = User::where('organization_id', $actor->organization_id)->whereKey($userId)->lockForUpdate()->firstOrFail();
+        if ($user->team_id !== null && $user->team_id !== $teamId) {
+            throw ValidationException::withMessages(['team_lead_id' => 'The team lead must be unassigned or already belong to this team.']);
+        }
+        if ($user->team_id === null) {
+            $user->team_id = $teamId;
+            $user->save();
+            DB::table('team_membership_history')->insert(['organization_id' => $actor->organization_id, 'team_id' => $teamId, 'user_id' => $userId, 'changed_by' => $actor->id, 'started_at' => now()]);
+        }
+        DB::table('teams')->where('id', $teamId)->update(['team_lead_id' => $userId]);
     }
 
     public function destroy(Request $request, int $id): JsonResponse

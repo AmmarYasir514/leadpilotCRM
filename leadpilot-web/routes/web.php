@@ -56,6 +56,8 @@ Route::middleware(['auth', EnsureActiveUser::class])->group(function (): void {
     Route::post('/upwork-profile/photo', [UpworkProfileController::class, 'uploadPhoto'])->middleware('throttle:20,1');
     Route::get('/upwork-profile', [UpworkProfileController::class, 'show']);
     Route::post('/upwork-profile', [UpworkProfileController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/upwork/job-preferences', [UpworkMcpController::class, 'jobPreferences']);
+    Route::put('/upwork/job-preferences', [UpworkMcpController::class, 'saveJobPreferences'])->middleware('throttle:20,1');
     Route::get('/portfolio-projects', [PortfolioProjectController::class, 'index']);
     Route::post('/portfolio-projects', [PortfolioProjectController::class, 'store'])->middleware('throttle:20,1');
     Route::post('/portfolio-projects/import-preview', [PortfolioProjectController::class, 'previewImport'])->middleware('throttle:20,1');
@@ -112,6 +114,20 @@ Route::middleware(['auth', EnsureActiveUser::class])->group(function (): void {
 
         return response()->json(['timezone' => $user->timezone]);
     });
+    Route::get('/account/preferences', function (Request $request) {
+        return response()->json(['admin_theme' => $request->user()->admin_theme])->header('Cache-Control', 'no-store');
+    });
+    Route::put('/account/preferences', function (Request $request) {
+        $data = $request->validate(['admin_theme' => ['sometimes', 'in:light,dark']]);
+        abort_if($data === [], 422, 'Choose an account preference to update.');
+        $user = $request->user();
+        if (array_key_exists('admin_theme', $data)) {
+            $user->admin_theme = $data['admin_theme'];
+        }
+        $user->save();
+
+        return response()->json(['admin_theme' => $user->admin_theme])->header('Cache-Control', 'no-store');
+    })->middleware('throttle:20,1');
     Route::get('/admin/activity-retention', function (Request $request) {
         $actor = $request->user();
         abort_unless($actor->is_super_admin && $actor->organization_id, 403);

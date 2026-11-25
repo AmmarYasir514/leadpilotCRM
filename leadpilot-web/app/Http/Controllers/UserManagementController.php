@@ -58,6 +58,7 @@ class UserManagementController extends Controller
         }
 
         return response()->json($query
+            ->with(['roles' => fn ($roles) => $roles->where('roles.organization_id', $actor->organization_id)->select('roles.id', 'roles.name')])
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%')))
             ->when(! empty($filters['status']), fn ($query) => $query->where('status', $filters['status']))
             ->when(! empty($filters['team_id']), fn ($query) => $query->where('team_id', $filters['team_id']))
@@ -71,7 +72,13 @@ class UserManagementController extends Controller
     {
         $actor = $this->authorizeAdmin($request, 'create');
         $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
-        $data = $request->validate(['name' => ['required', 'string', 'max:255'], 'email' => ['required', 'email', 'max:255', 'unique:users,email']]);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'team_id' => ['nullable', 'integer', Rule::exists('teams', 'id')->where('organization_id', $actor->organization_id)],
+            'role_ids' => ['sometimes', 'array'],
+            'role_ids.*' => ['integer', 'distinct', Rule::exists('roles', 'id')->where('organization_id', $actor->organization_id)],
+        ]);
         $user = DB::transaction(function () use ($actor, $data): User {
             $this->lockAuthorizedAdmin($actor, 'create');
             $user = new User;
@@ -81,7 +88,15 @@ class UserManagementController extends Controller
             $user->organization_id = $actor->organization_id;
             $user->status = 'invited';
             $user->created_by = $actor->id;
+            $user->team_id = $data['team_id'] ?? null;
             $user->save();
+            if ($user->team_id !== null) {
+                DB::table('team_membership_history')->insert(['organization_id' => $actor->organization_id, 'team_id' => $user->team_id, 'user_id' => $user->id, 'changed_by' => $actor->id, 'started_at' => now()]);
+            }
+            if (! empty($data['role_ids'])) {
+                $now = now();
+                DB::table('user_roles')->insert(array_map(fn (int $roleId): array => ['user_id' => $user->id, 'role_id' => $roleId, 'created_at' => $now, 'updated_at' => $now], $data['role_ids']));
+            }
             $this->audit($actor, $user, 'user.created');
 
             return $user;

@@ -15,7 +15,27 @@ class AuditController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        return response()->json($this->filteredQuery($request)->orderByDesc('id')->paginate(25));
+        $filtered = $this->filteredQuery($request);
+        $accessChanges = (clone $filtered)->where(function (Builder $query): void {
+            $query->where('action', 'like', '%role%')
+                ->orWhere('action', 'like', '%permission%')
+                ->orWhere('action', 'like', '%override%')
+                ->orWhere('action', 'like', '%super_admin%')
+                ->orWhere('action', 'like', '%team%')
+                ->orWhere('action', 'like', '%user.status_%');
+        })->count();
+        $page = (clone $filtered)
+            ->select('audit_logs.*')
+            ->selectSub(DB::table('users as audit_actor')->select('name')->whereColumn('audit_actor.id', 'audit_logs.actor_id')->limit(1), 'actor_name')
+            ->selectSub(DB::table('users as audit_subject')->select('name')->whereColumn('audit_subject.id', 'audit_logs.subject_id')->where('audit_logs.subject_type', 'user')->limit(1), 'subject_name')
+            ->selectSub(DB::table('users as audit_subject_email')->select('email')->whereColumn('audit_subject_email.id', 'audit_logs.subject_id')->where('audit_logs.subject_type', 'user')->limit(1), 'subject_email')
+            ->orderByDesc('audit_logs.id')
+            ->paginate(10);
+        $actor = $request->user();
+        $people = User::where('organization_id', $actor->organization_id)->orderBy('name')->get(['id', 'name', 'email']);
+        $actions = DB::table('audit_logs')->where('organization_id', $actor->organization_id)->distinct()->orderBy('action')->pluck('action');
+
+        return response()->json($page->toArray() + ['access_changes' => $accessChanges, 'people' => $people, 'actions' => $actions]);
     }
 
     public function export(Request $request): StreamedResponse

@@ -43,6 +43,38 @@ class PhaseOneTest extends TestCase
         $this->withSession(['session_version' => 0])->actingAs($unauthorized)->putJson('/follow-up-preferences', ['cadence' => [24]])->assertForbidden();
     }
 
+    public function test_upwork_job_preferences_are_saved_to_the_authenticated_crm_account(): void
+    {
+        $org = DB::table('organizations')->insertGetId(['name' => 'Preferences workspace', 'created_at' => now(), 'updated_at' => now()]);
+        $owner = User::factory()->create(['organization_id' => $org, 'is_super_admin' => true]);
+        $other = User::factory()->create(['organization_id' => $org, 'is_super_admin' => true]);
+        $preferences = ['keywords' => 'Shopify development', 'targetSkills' => 'Shopify, Liquid', 'countries' => 'United States', 'fixedMinimum' => '500', 'hourlyMinimum' => '35', 'weights' => ['skills' => 15, 'budget' => 12, 'competition' => 6, 'age' => 3]];
+
+        $this->withSession(['session_version' => 0])->actingAs($owner)->getJson('/upwork/job-preferences')->assertOk()->assertJsonPath('preferences', null);
+        $this->putJson('/upwork/job-preferences', ['preferences' => $preferences])->assertOk()->assertJsonPath('preferences.keywords', 'Shopify development');
+        $this->assertDatabaseHas('upwork_job_preferences', ['user_id' => $owner->id, 'organization_id' => $org]);
+        $this->getJson('/upwork/job-preferences')->assertOk()->assertJsonPath('preferences.fixedMinimum', '500');
+        $this->withSession(['session_version' => 0])->actingAs($other)->getJson('/upwork/job-preferences')->assertOk()->assertJsonPath('preferences', null);
+        $this->putJson('/upwork/job-preferences', ['preferences' => [...$preferences, 'weights' => [...$preferences['weights'], 'skills' => 500]]])->assertUnprocessable();
+    }
+
+    public function test_local_port_8000_redirects_to_the_single_workspace_address(): void
+    {
+        $this->get('http://127.0.0.1:8000/upwork/mcp/connect?source=crm')->assertStatus(307)->assertRedirect('http://127.0.0.1:8137/upwork/mcp/connect?source=crm');
+        $this->get('http://127.0.0.1:8137/login')->assertUnauthorized();
+    }
+
+    public function test_admin_appearance_is_stored_on_the_user_account(): void
+    {
+        $organization = DB::table('organizations')->insertGetId(['name' => 'Appearance workspace', 'created_at' => now(), 'updated_at' => now()]);
+        $user = User::factory()->create(['organization_id' => $organization]);
+        $other = User::factory()->create(['organization_id' => $organization]);
+
+        $this->withSession(['session_version' => 0])->actingAs($user)->putJson('/account/preferences', ['admin_theme' => 'dark'])->assertOk()->assertJsonPath('admin_theme', 'dark');
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'admin_theme' => 'dark']);
+        $this->withSession(['session_version' => 0])->actingAs($other)->getJson('/account/preferences')->assertOk()->assertJsonPath('admin_theme', null);
+    }
+
     public function test_confirmed_closed_deal_updates_linked_lead_and_stops_followups(): void
     {
         $org = DB::table('organizations')->insertGetId(['name' => 'Closed deal test', 'created_at' => now(), 'updated_at' => now()]);
@@ -717,7 +749,9 @@ class PhaseOneTest extends TestCase
         DB::table('audit_logs')->insert(['organization_id' => $org, 'actor_id' => $admin->id, 'action' => 'local.event', 'created_at' => now()]);
         DB::table('audit_logs')->insert(['organization_id' => $otherOrg, 'actor_id' => $other->id, 'action' => 'foreign.event', 'created_at' => now()]);
         $this->withSession(['session_version' => 0])->actingAs($regular)->getJson('/admin/audit')->assertForbidden();
-        $this->withSession(['session_version' => 0])->actingAs($admin)->getJson('/admin/audit')->assertOk()->assertJsonFragment(['action' => 'local.event'])->assertJsonMissing(['action' => 'foreign.event']);
+        DB::table('audit_logs')->insert(['organization_id' => $org, 'actor_id' => $admin->id, 'action' => 'user.role_changed', 'subject_type' => 'user', 'subject_id' => $regular->id, 'created_at' => now()]);
+        $auditResponse = $this->withSession(['session_version' => 0])->actingAs($admin)->getJson('/admin/audit')->assertOk()->assertJsonFragment(['action' => 'local.event'])->assertJsonFragment(['actor_name' => $admin->name])->assertJsonFragment(['subject_name' => $regular->name])->assertJsonFragment(['email' => $regular->email])->assertJsonMissing(['action' => 'foreign.event'])->assertJsonPath('access_changes', 1)->assertJsonPath('per_page', 10);
+        $this->assertContains('user.role_changed', $auditResponse->json('actions'));
         $this->withSession(['session_version' => 0])->actingAs($admin)->getJson('/admin/audit?user_id='.$other->id)->assertNotFound();
         DB::table('audit_logs')->insert(['organization_id' => $org, 'actor_id' => $admin->id, 'action' => '=danger', 'created_at' => now()]);
         $export = $this->get('/admin/audit/export');
@@ -726,6 +760,20 @@ class PhaseOneTest extends TestCase
         $this->assertStringNotContainsString('foreign.event', $export->streamedContent());
         $this->assertStringContainsString("'=danger", $export->streamedContent());
         $this->withSession(['session_version' => 0])->actingAs($regular)->get('/admin/audit/export')->assertForbidden();
+    }
+
+    public function test_audit_access_change_count_tracks_filters_and_pages_ten_events(): void
+    {
+        $org = DB::table('organizations')->insertGetId(['name' => 'Audit QA', 'created_at' => now(), 'updated_at' => now()]);
+        $admin = User::factory()->create(['organization_id' => $org, 'is_super_admin' => true]);
+        for ($index = 0; $index < 12; $index++) {
+            DB::table('audit_logs')->insert(['organization_id' => $org, 'actor_id' => $admin->id, 'action' => $index < 3 ? 'user.role_changed' : 'auth.login', 'created_at' => now()->subMinutes($index)]);
+        }
+
+        $firstPage = $this->withSession(['session_version' => 0])->actingAs($admin)->getJson('/admin/audit')->assertOk()->assertJsonPath('total', 12)->assertJsonPath('per_page', 10)->assertJsonPath('access_changes', 3);
+        $this->assertCount(10, $firstPage->json('data'));
+        $this->getJson('/admin/audit?action=auth.login')->assertOk()->assertJsonPath('total', 9)->assertJsonPath('access_changes', 0);
+        $this->getJson('/admin/audit?page=2')->assertOk()->assertJsonPath('current_page', 2)->assertJsonPath('access_changes', 3);
     }
 
     public function test_initial_setup_creates_one_admin_with_a_hashed_password(): void
@@ -979,6 +1027,33 @@ class PhaseOneTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'subject_id' => $team, 'action' => 'team.renamed']);
     }
 
+    public function test_new_user_can_be_created_with_optional_team_and_role(): void
+    {
+        $org = DB::table('organizations')->insertGetId(['name' => 'Workspace', 'created_at' => now(), 'updated_at' => now()]);
+        $admin = User::factory()->create(['organization_id' => $org, 'is_super_admin' => true]);
+        $team = DB::table('teams')->insertGetId(['organization_id' => $org, 'name' => 'Sales', 'created_at' => now(), 'updated_at' => now()]);
+        $role = DB::table('roles')->insertGetId(['organization_id' => $org, 'name' => 'Sales Rep', 'created_at' => now(), 'updated_at' => now()]);
+
+        $response = $this->withSession(['session_version' => 0])->actingAs($admin)->postJson('/admin/users', ['name' => 'Jordan Miles', 'email' => 'jordan@example.test', 'team_id' => $team, 'role_ids' => [$role]])->assertCreated();
+        $userId = $response->json('id');
+        $this->assertDatabaseHas('users', ['id' => $userId, 'team_id' => $team, 'status' => 'invited']);
+        $this->assertDatabaseHas('team_membership_history', ['user_id' => $userId, 'team_id' => $team, 'changed_by' => $admin->id]);
+        $this->assertDatabaseHas('user_roles', ['user_id' => $userId, 'role_id' => $role]);
+    }
+
+    public function test_team_lead_must_be_an_organization_member_and_becomes_a_team_member(): void
+    {
+        $org = DB::table('organizations')->insertGetId(['name' => 'Workspace', 'created_at' => now(), 'updated_at' => now()]);
+        $admin = User::factory()->create(['organization_id' => $org, 'is_super_admin' => true]);
+        $lead = User::factory()->create(['organization_id' => $org, 'team_id' => null]);
+        $team = DB::table('teams')->insertGetId(['organization_id' => $org, 'name' => 'Sales', 'created_at' => now(), 'updated_at' => now()]);
+
+        $this->withSession(['session_version' => 0])->actingAs($admin)->patchJson('/admin/teams/'.$team, ['team_lead_id' => $lead->id])->assertOk();
+        $this->assertDatabaseHas('teams', ['id' => $team, 'team_lead_id' => $lead->id]);
+        $this->assertDatabaseHas('users', ['id' => $lead->id, 'team_id' => $team]);
+        $this->assertDatabaseHas('team_membership_history', ['user_id' => $lead->id, 'team_id' => $team]);
+    }
+
     public function test_audit_access_is_enforced_by_live_organization_permission(): void
     {
         $org = DB::table('organizations')->insertGetId(['name' => 'One', 'created_at' => now(), 'updated_at' => now()]);
@@ -1118,15 +1193,17 @@ class PhaseOneTest extends TestCase
         $otherTeam = DB::table('teams')->insertGetId(['organization_id' => $org, 'name' => 'Other', 'created_at' => now(), 'updated_at' => now()]);
         $foreignTeam = DB::table('teams')->insertGetId(['organization_id' => $foreignOrg, 'name' => 'Foreign', 'created_at' => now(), 'updated_at' => now()]);
         $role = DB::table('roles')->insertGetId(['organization_id' => $org, 'name' => 'Sales', 'created_at' => now(), 'updated_at' => now()]);
+        $foreignRole = DB::table('roles')->insertGetId(['organization_id' => $foreignOrg, 'name' => 'Foreign role', 'created_at' => now(), 'updated_at' => now()]);
         $manager = User::factory()->create(['organization_id' => $org, 'team_id' => $team, 'status' => 'active']);
         $member = User::factory()->create(['organization_id' => $org, 'team_id' => $team, 'status' => 'active']);
         $outside = User::factory()->create(['organization_id' => $org, 'team_id' => $otherTeam, 'status' => 'active']);
         foreach ([$member, $outside] as $user) {
             DB::table('user_roles')->insert(['user_id' => $user->id, 'role_id' => $role, 'created_at' => now(), 'updated_at' => now()]);
         }
+        DB::table('user_roles')->insert(['user_id' => $member->id, 'role_id' => $foreignRole, 'created_at' => now(), 'updated_at' => now()]);
         $permission = DB::table('permissions')->where('module', 'user_management')->where('action', 'view')->value('id');
         DB::table('user_permission_overrides')->insert(['user_id' => $manager->id, 'permission_id' => $permission, 'allowed' => true, 'scope' => 'team']);
-        $this->withSession(['session_version' => 0])->actingAs($manager)->getJson('/admin/users?role_id='.$role.'&status=active')->assertOk()->assertJsonFragment(['email' => $member->email])->assertJsonMissing(['email' => $outside->email]);
+        $this->withSession(['session_version' => 0])->actingAs($manager)->getJson('/admin/users?role_id='.$role.'&status=active')->assertOk()->assertJsonFragment(['email' => $member->email])->assertJsonPath('data.0.roles.0.name', 'Sales')->assertJsonMissing(['name' => 'Foreign role'])->assertJsonMissing(['email' => $outside->email]);
         $this->withSession(['session_version' => 0])->actingAs($manager)->getJson('/admin/users?team_id='.$otherTeam)->assertOk()->assertJsonMissing(['email' => $outside->email]);
         $this->withSession(['session_version' => 0])->actingAs($manager)->getJson('/admin/users?team_id='.$foreignTeam)->assertUnprocessable();
     }
