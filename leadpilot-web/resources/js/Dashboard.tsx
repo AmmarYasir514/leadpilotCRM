@@ -1,4 +1,5 @@
 import Targets from './Targets';
+import {AppIcon} from './AppIcon';
 import React, { useEffect, useState } from 'react';
 
 type Employee = {id: number; name: string; status: string; team_id: number | null; last_activity_at: string | null};
@@ -38,7 +39,7 @@ export default function Dashboard({timezone}: {timezone: string}) {
             .then(setProfile).catch(reason => { if (reason.name !== 'AbortError') setError(reason.message); });
         return () => controller.abort();
     }, [selected]);
-    return <section><h2>Super Admin dashboard</h2><p>User counts are current. Activity today means a recorded request today, not time worked.</p>
+    return <section><h2 className="heading-with-icon"><AppIcon name="dashboard"/>Super Admin dashboard</h2><p>User counts are current. Activity today means a recorded request today, not time worked.</p>
         {error && <p role="alert">{error}</p>}
         {data ? <><label>Team<select value={team} onChange={e => {setTeam(e.target.value); setEmployeeId(''); setPage(1); setSelected(null);}}><option value="">All teams</option>{data.teams.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>{employeeId && <p>Showing one employee. <button type="button" className="link" onClick={() => {setEmployeeId(''); setPage(1); setSelected(null);}}>Show all employees</button></p>}
         <div className="table"><table><thead><tr><th>Total users</th><th>Active accounts</th><th>Suspended accounts</th><th>Active today</th><th>Signed in today</th></tr></thead><tbody><tr><td>{data.total_users}</td><td>{data.active_users}</td><td>{data.suspended_users}</td><td>{data.active_today}</td><td>{data.signed_in_today}</td></tr></tbody></table></div>

@@ -1,0 +1,128 @@
+<div id="leadpilot-user-flow" aria-label="LeadPilot user setup and administration flow">
+  <style>
+    #leadpilot-user-flow{--lp-ink:#1f3d69;--lp-muted:#75869c;--lp-line:#dfe8f2;--lp-soft:#f3f7fc;--lp-green:#07836f;--lp-green-soft:#e5f5f0;color:var(--lp-ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,sans-serif}
+    #leadpilot-user-flow *{box-sizing:border-box}
+    #leadpilot-user-flow .flow-head{margin:0 0 16px;color:var(--lp-muted);font-size:12px}
+    #leadpilot-user-flow .steps{display:grid;gap:0;max-width:720px;margin:auto}
+    #leadpilot-user-flow .step{position:relative;display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start}
+    #leadpilot-user-flow .step:not(:last-child)::before{position:absolute;top:38px;bottom:0;left:18px;width:1px;background:var(--lp-line);content:""}
+    #leadpilot-user-flow .step-mark{position:relative;z-index:1;display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--lp-line);border-radius:50%;background:var(--lp-green-soft);color:var(--lp-green);font-weight:750}
+    #leadpilot-user-flow .step-button{width:100%;padding:0 0 16px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+    #leadpilot-user-flow .step-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 7px;font-size:14px;font-weight:750}
+    #leadpilot-user-flow .step-cue{color:var(--lp-muted);font-size:12px;font-weight:450}
+    #leadpilot-user-flow .screen{overflow:hidden;border:1px solid var(--lp-line);border-radius:12px;background:#fff;box-shadow:0 4px 14px #1f3d6909}
+    #leadpilot-user-flow .screen-top{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #e8eef5;background:#fbfcfe;color:var(--lp-muted);font-size:10px}
+    #leadpilot-user-flow .brand{color:var(--lp-ink);font-weight:800;letter-spacing:.07em}
+    #leadpilot-user-flow .screen-content{padding:12px}
+    #leadpilot-user-flow .tab-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+    #leadpilot-user-flow .tab{padding:5px 8px;border:1px solid #dce6f3;border-radius:7px;background:#eff5fd;color:#36547d;font-size:10px;white-space:nowrap}
+    #leadpilot-user-flow .tab.active{border-color:var(--lp-green);background:var(--lp-green);color:#fff}
+    #leadpilot-user-flow .screen-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+    #leadpilot-user-flow .screen-heading strong{font-size:14px}
+    #leadpilot-user-flow .screen-heading small{display:block;margin-top:2px;color:var(--lp-muted);font-size:10px}
+    #leadpilot-user-flow .pill-button{padding:6px 9px;border:0;border-radius:7px;background:var(--lp-green);color:white;font-size:10px;font-weight:700;white-space:nowrap}
+    #leadpilot-user-flow .filters{display:flex;gap:6px;margin-bottom:8px}
+    #leadpilot-user-flow .filter{flex:1;padding:6px 8px;border:1px solid var(--lp-line);border-radius:6px;color:#8292a8;font-size:9px}
+    #leadpilot-user-flow .table{width:100%;border-collapse:collapse;font-size:9px;text-align:left}
+    #leadpilot-user-flow .table th{padding:6px;color:#8292a8;font-weight:700}
+    #leadpilot-user-flow .table td{padding:7px 6px;border-top:1px solid #edf1f6;color:#526883}
+    #leadpilot-user-flow .person{color:var(--lp-ink);font-weight:700}
+    #leadpilot-user-flow .status{padding:3px 6px;border-radius:99px;background:var(--lp-green-soft);color:#17725f;font-size:8px;font-weight:700}
+    #leadpilot-user-flow .subgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    #leadpilot-user-flow .field{display:grid;gap:4px;color:#36547d;font-size:9px;font-weight:700}
+    #leadpilot-user-flow .input{padding:7px 8px;border:1px solid #d7e1ee;border-radius:6px;color:#75869c;font-size:10px;font-weight:450}
+    #leadpilot-user-flow .helper{margin-top:4px;color:#8292a8;font-size:9px;font-weight:450}
+    #leadpilot-user-flow .drawer-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(175px,.72fr);gap:10px}
+    #leadpilot-user-flow .drawer-card{padding:9px;border:1px solid #e4eaf2;border-radius:8px;background:#fff}
+    #leadpilot-user-flow .drawer-card h4{margin:0 0 7px;font-size:10px}
+    #leadpilot-user-flow .role-line,#leadpilot-user-flow .access-line{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #edf1f6;color:#526883;font-size:9px}
+    #leadpilot-user-flow .access-line b{color:var(--lp-ink)}
+    #leadpilot-user-flow .role-tag{padding:3px 6px;border-radius:99px;background:var(--lp-green-soft);color:#17725f;font-size:8px}
+    #leadpilot-user-flow .banner{display:flex;align-items:center;gap:8px;padding:9px;border-radius:8px;background:var(--lp-green-soft);color:#176b59;font-size:10px}
+    #leadpilot-user-flow .banner-mark{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:50%;background:#fff;color:var(--lp-green);font-weight:800}
+    #leadpilot-user-flow .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    #leadpilot-user-flow .mini-card{padding:9px;border:1px solid #e4eaf2;border-radius:8px;background:#fbfcfe}
+    #leadpilot-user-flow .mini-card strong{display:block;font-size:10px}
+    #leadpilot-user-flow .mini-card small{display:block;margin-top:3px;color:var(--lp-muted);font-size:9px}
+    #leadpilot-user-flow .audit-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:7px 0;border-top:1px solid #edf1f6;color:#526883;font-size:9px}
+    #leadpilot-user-flow .overview-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+    #leadpilot-user-flow .overview-counts span{padding:8px;border:1px solid #e4eaf2;border-radius:7px;background:#fbfcfe;color:var(--lp-muted);font-size:9px}
+    #leadpilot-user-flow .overview-counts b{display:block;color:var(--lp-ink);font-size:14px}
+    #leadpilot-user-flow .focus{min-height:18px;margin:0 0 0 50px;color:var(--lp-muted);font-size:11px}
+    #leadpilot-user-flow .step-button:focus-visible{outline:2px solid #71a2ff;outline-offset:3px;border-radius:8px}
+    @media(max-width:520px){#leadpilot-user-flow .step{grid-template-columns:32px minmax(0,1fr);gap:8px}#leadpilot-user-flow .step-mark{width:32px;height:32px}#leadpilot-user-flow .step:not(:last-child)::before{top:32px;left:15px}#leadpilot-user-flow .step-title{align-items:flex-start;flex-direction:column;gap:1px}#leadpilot-user-flow .drawer-layout{grid-template-columns:1fr}#leadpilot-user-flow .subgrid{grid-template-columns:1fr}#leadpilot-user-flow .table th:nth-child(2),#leadpilot-user-flow .table td:nth-child(2){display:none}}
+  </style>
+  <p class="flow-head">Select any step to highlight what happens next. All screens stay visible so you can review the full flow.</p>
+  <div class="steps" role="list" aria-label="New user setup flow">
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">1</span>
+      <button class="step-button" type="button" data-cue="Start from the approved Overview, then open Users.">
+        <span class="step-title">Overview <span class="step-cue">Start from the existing admin home</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE</span><span>Demo Admin</span></span><span class="screen-content"><span class="tab-row"><span class="tab active">Overview</span><span class="tab">Users</span><span class="tab">Roles &amp; permissions</span><span class="tab">Teams</span><span class="tab">Activity &amp; audit</span></span><span class="screen-heading"><span><strong>Workspace overview</strong><small>People, access and recent activity in one place.</small></span></span><span class="overview-counts"><span><b>12</b>Total users</span><span><b>3</b>Teams</span><span><b>5</b>Roles</span></span></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">2</span>
+      <button class="step-button" type="button" data-cue="The Users screen keeps search, filters, status and Manage together.">
+        <span class="step-title">Users <span class="step-cue">Choose Add user</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE</span><span>Users</span></span><span class="screen-content"><span class="tab-row"><span class="tab">Overview</span><span class="tab active">Users</span><span class="tab">Roles &amp; permissions</span><span class="tab">Teams</span><span class="tab">Activity &amp; audit</span></span><span class="screen-heading"><span><strong>Users</strong><small>Manage people and their workspace access.</small></span><span class="pill-button">+ Add user</span></span><span class="filters"><span class="filter">Search name or email</span><span class="filter">All statuses</span><span class="filter">All teams</span></span><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Manage</th></tr></thead><tbody><tr><td class="person">Jordan Miles</td><td>jordan@leadpilot.io</td><td>Sales Manager</td><td><span class="status">Active</span></td><td>Manage</td></tr></tbody></table></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">3</span>
+      <button class="step-button" type="button" data-cue="Add a teammate's name and email; team and role can be selected here.">
+        <span class="step-title">Add user <span class="step-cue">Enter details and optional access</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE / USERS</span><span>Close</span></span><span class="screen-content"><span class="drawer-layout"><span><span class="screen-heading"><span><strong>Add a user</strong><small>Create an account for your teammate.</small></span></span><span class="subgrid"><label class="field">Full name<span class="input">e.g. Jordan Miles</span></label><label class="field">Email address<span class="input">name@company.com</span></label><label class="field">Team <span class="input">Select a team (optional)</span></label><label class="field">Role <span class="input">Select a role (optional)</span></label></span><span class="helper">Roles decide what the new user can view and manage.</span></span><span class="drawer-card"><h4>After creating</h4><span class="role-line">User account <span class="role-tag">Invited</span></span><span class="role-line">Next step <span>Send sign-in link</span></span></span></span></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">4</span>
+      <button class="step-button" type="button" data-cue="After creation, the new account appears in Users with its invitation status.">
+        <span class="step-title">User created <span class="step-cue">Return to the Users list</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE / USERS</span><span>List updated</span></span><span class="screen-content"><span class="banner"><span class="banner-mark">✓</span><span><b>User added</b><br>Send a sign-in link when you're ready.</span></span><table class="table" style="margin-top:8px"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Manage</th></tr></thead><tbody><tr><td class="person">Jordan Miles</td><td>jordan@leadpilot.io</td><td>Sales Representative</td><td><span class="status">Invited</span></td><td>Manage</td></tr></tbody></table></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">5</span>
+      <button class="step-button" type="button" data-cue="Manage user keeps profile, roles and individual access in the approved side drawer.">
+        <span class="step-title">Manage user <span class="step-cue">Review assigned access</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">USER ACCESS / MANAGE USER</span><span>×</span></span><span class="screen-content"><span class="screen-heading"><span><strong>Jordan Miles</strong><small>jordan@leadpilot.io / Invited</small></span></span><span class="drawer-layout"><span class="drawer-card"><h4>Profile and account</h4><span class="subgrid"><span class="input">Jordan Miles</span><span class="input">Sales / Invited</span></span><h4 style="margin-top:10px">Assigned roles</h4><span class="role-line"><b>Sales Representative</b><span class="role-tag">Assigned</span></span><h4 style="margin-top:10px">Individual access</h4><span class="access-line"><b>Leads / View</b><span>Inherit / Assigned</span></span><span class="access-line"><b>Leads / Edit</b><span>Allow / Team</span></span></span><span class="drawer-card"><h4>Account actions</h4><span class="role-line">Send sign-in link</span><span class="role-line">View activity</span><span class="role-line">Team history</span><span class="role-line">Save changes</span></span></span></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">6</span>
+      <button class="step-button" type="button" data-cue="Roles & permissions defines the standard access inherited by users.">
+        <span class="step-title">Roles &amp; permissions <span class="step-cue">Set the shared role rules</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE / ROLES &amp; PERMISSIONS</span><span>Access control</span></span><span class="screen-content"><span class="drawer-layout"><span class="drawer-card"><h4>Roles</h4><span class="role-line">Admin</span><span class="role-line">Sales Manager</span><span class="role-line"><b>Sales Representative</b><span class="role-tag">Selected</span></span><span class="role-line">Viewer</span></span><span class="drawer-card"><h4>Action access and scope</h4><span class="access-line"><b>Leads / View</b><span>Assigned</span></span><span class="access-line"><b>Leads / Create</b><span>Own</span></span><span class="access-line"><b>Proposals / View</b><span>Own</span></span><span class="access-line"><b>Clients / View</b><span>Team</span></span></span></span></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">7</span>
+      <button class="step-button" type="button" data-cue="Teams shows the user's team and its members in the same workspace style.">
+        <span class="step-title">Teams <span class="step-cue">Check team membership</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE / TEAMS</span><span>Workspace organization</span></span><span class="screen-content"><span class="screen-heading"><span><strong>Teams</strong><small>Group users and keep ownership clear.</small></span><span class="pill-button">+ Create team</span></span><span class="cards"><span class="mini-card"><strong>Sales</strong><small>Jordan Miles, Samira Khan, Riley Thompson</small></span><span class="mini-card"><strong>Operations</strong><small>Devon Chen, Alex Morgan</small></span></span></span></span>
+      </button>
+    </article>
+    <article class="step" role="listitem">
+      <span class="step-mark" aria-hidden="true">8</span>
+      <button class="step-button" type="button" data-cue="Activity & audit records the account and access changes for review.">
+        <span class="step-title">Activity &amp; audit <span class="step-cue">Confirm the change was recorded</span></span>
+        <span class="screen"><span class="screen-top"><span class="brand">LEADPILOT WORKSPACE / ACTIVITY &amp; AUDIT</span><span>Recent activity</span></span><span class="screen-content"><span class="screen-heading"><span><strong>Activity &amp; audit</strong><small>Filter and export workspace activity.</small></span><span class="pill-button">Download CSV</span></span><span class="filters"><span class="filter">From / To</span><span class="filter">Person</span><span class="filter">Activity</span></span><span class="audit-row"><b>Time</b><b>Activity</b><b>Changed by</b></span><span class="audit-row"><span>Today</span><span>User invited</span><span>Demo Admin</span></span><span class="audit-row"><span>Today</span><span>Role assigned</span><span>Demo Admin</span></span></span></span>
+      </button>
+    </article>
+  </div>
+  <p class="focus" id="leadpilot-user-flow-focus" aria-live="polite">Select a step to see its purpose.</p>
+  <script>
+    const flowRoot = document.getElementById('leadpilot-user-flow');
+    const flowFocus = document.getElementById('leadpilot-user-flow-focus');
+    flowRoot.querySelectorAll('.step-button').forEach((step) => {
+      step.addEventListener('click', () => {
+        flowFocus.textContent = step.dataset.cue;
+        flowRoot.querySelectorAll('.step-mark').forEach((mark) => { mark.style.background = ''; mark.style.color = ''; });
+        const mark = step.parentElement.querySelector('.step-mark');
+        mark.style.background = 'var(--lp-green)';
+        mark.style.color = '#fff';
+      });
+    });
+  </script>
+</div>

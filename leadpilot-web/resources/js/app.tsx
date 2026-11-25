@@ -14,41 +14,22 @@ import ActivitySettings from './ActivitySettings';
 import SalesDashboard from './SalesDashboard';
 import Portfolio from './Portfolio';
 import SalesPlan from './SalesPlan';
-import SalesDemo from './SalesDemo';
 import UpworkProfile from './UpworkProfile';
 import UpworkLiveRecords from './UpworkLiveRecords';
 import ChatInbox from './ChatInbox';
 import AdminWorkspace from './AdminWorkspace';
 import AdminDialog from './AdminDialog';
+import {AppIcon} from './AppIcon';
 import React, { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 
 type User = { id: number; name: string; email: string; status: string; is_super_admin: boolean; timezone?: string; admin_theme?: string | null; phone?: string | null; job_title?: string | null; department?: string | null; joining_date?: string | null; team_id?: number | null; roles?: {id: number; name: string}[] };
 type AuditPerson = {id: number; name: string; email?: string};
 type AuditRecord = { id: number; actor_id: number | null; actor_name?: string | null; action: string; subject_type: string | null; subject_id: number | null; subject_name?: string | null; subject_email?: string | null; created_at: string };
-const navigationPaths: Record<string, string> = {
-    dashboard: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
-    findjobs: 'M11 4a7 7 0 100 14 7 7 0 000-14z M16 16l5 5',
-    writer: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z M19 15l.7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15z',
-    upworkprofile: 'M12 12a4 4 0 100-8 4 4 0 000 8z M4 21c0-4 3-6 8-6s8 2 8 6',
-    demo: 'M4 4h16v16H4z M8 12h8 M12 8v8',
-    salesplan: 'M12 3a9 9 0 100 18 9 9 0 000-18z M12 7v5l4 2',
-    knowledge: 'M4 4h6a3 3 0 013 3v13a3 3 0 00-3-3H4z M20 4h-4a3 3 0 00-3 3v13a3 3 0 013-3h4z',
-    proposals: 'M5 3h10l4 4v14H5z M14 3v5h5 M8 12h8 M8 16h8',
-    leads: 'M12 21s7-3.5 7-10a7 7 0 10-14 0c0 6.5 7 10 7 10z M12 8a3 3 0 100 6 3 3 0 000-6z',
-    followups: 'M12 3a9 9 0 100 18 9 9 0 000-18z M12 7v5l3 2',
-    deals: 'M3 8l9-5 9 5v9l-9 4-9-4z M3 8l9 5 9-5 M12 13v8',
-    clients: 'M9 12a4 4 0 100-8 4 4 0 000 8z M2.5 20c0-3 2.7-5 6.5-5s6.5 2 6.5 5 M17 5a4 4 0 010 7 M17 15c2.6.4 4.5 2 4.5 5',
-    meetings: 'M4 5h16v16H4z M8 3v4 M16 3v4 M4 10h16 M8 14h3 M8 17h3',
-    performance: 'M4 20h16 M7 17v-5 M12 17V7 M17 17V4',
-    integrations: 'M7 7h3v3H7z M14 7h3v3h-3z M7 14h3v3H7z M14 14h3v3h-3z M10 8.5h4 M8.5 10v4 M15.5 10v4 M10 15.5h4',
-    chats: 'M4 5h16v12H8l-4 3z M8 9h8 M8 13h5',
-    settings: 'M12 8a4 4 0 100 8 4 4 0 000-8z M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6L7 7 M17 17l1.4 1.4 M18.4 5.6L17 7 M7 17l-1.4 1.4',
-    admin: 'M12 3l8 3v5c0 5-3 8-8 10-5-2-8-5-8-10V6z M9 12l2 2 4-4',
-};
 function NavigationIcon({name}: {name: string}) {
-    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={navigationPaths[name]} /></svg>;
+    return <AppIcon name={name} />;
 }
+
 const csrf = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
 async function request(path: string, method = 'GET', data?: unknown) {
     const response = await fetch(path, { method, credentials: 'same-origin', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }, body: data ? JSON.stringify(data) : undefined });
@@ -145,7 +126,6 @@ function App() {
             {id:'writer', label:'AI writer', visible:true},
             {id:'knowledge', label:'Knowledge base', visible:true},
             {id:'salesplan', label:'Sales targets', visible:true},
-            {id:'demo', label:'Sales demo', visible:true},
             {id:'upworkprofile', label:'Upwork profile', visible:true},
             {id:'proposals', label:'Proposals Submitted', visible:proposalPermissions.view || proposalPermissions.create},
             {id:'leads', label:'Leads', visible:leadPermissions.view || leadPermissions.create},
@@ -168,7 +148,6 @@ function App() {
         <div className="workspace-panel" hidden={activePage !== 'findjobs'}><FindNewJobs userId={user.id} active={activePage === 'findjobs'} onWrite={(job) => { const event = new CustomEvent('leadpilot-write-job', {detail: job, cancelable: true}); if (window.dispatchEvent(event)) {setSelectedPage('writer'); window.scrollTo({top:0, behavior:'auto'});} }} /></div>
         <div className="workspace-panel" hidden={activePage !== 'writer'}><button type="button" className="back-to-jobs" onClick={()=>{setSelectedPage('findjobs');window.scrollTo({top:0,behavior:'auto'});}}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>Back to jobs</button><AiWriter canCreateProposal={Boolean(proposalPermissions.create)} canViewProposals={Boolean(proposalPermissions.view)} /></div>
         <div className="workspace-panel" hidden={activePage !== 'knowledge'}><Portfolio /></div>
-        <div className="workspace-panel" hidden={activePage !== 'demo'}><SalesDemo /></div>
         <div className="workspace-panel" hidden={activePage !== 'upworkprofile'}><UpworkLiveRecords kind="profile" /><UpworkProfile /></div>
         <div className="workspace-panel" hidden={activePage !== 'proposals'}>{(proposalPermissions.view || proposalPermissions.create) && <><UpworkLiveRecords kind="proposals" />{proposalPermissions.create && proposalPermissions.import && <details className="proposal-manual-import"><summary>Import copied Upwork proposals</summary><UpworkImport /></details>}<Proposals canView={Boolean(proposalPermissions.view)} canCreate={Boolean(proposalPermissions.create)} canEdit={Boolean(proposalPermissions.edit)} canViewLeads={Boolean(leadPermissions.view)} /></>}</div>
         <div className="workspace-panel" hidden={activePage !== 'chats'}>{leadPermissions.view && proposalPermissions.view && <ChatInbox />}</div>
@@ -178,7 +157,7 @@ function App() {
         <div className="workspace-panel" hidden={activePage !== 'clients'}>{(clientPermissions.view || clientPermissions.create) && <Clients canView={Boolean(clientPermissions.view)} canCreate={Boolean(clientPermissions.create)} canEdit={Boolean(clientPermissions.edit)} canArchive={Boolean(clientPermissions.delete)} />}</div>
         <div className="workspace-panel" hidden={activePage !== 'meetings'}><GoogleCalendar isAdmin={Boolean(user.is_super_admin)} /></div>
         <div className="workspace-panel" hidden={activePage !== 'performance'}>{performancePermissions.view && <Performance canManage={Boolean(performancePermissions.manage)} />}</div>
-        <div className="workspace-panel settings-page" hidden={activePage !== 'settings'}><div className="settings-intro"><h2>Account settings</h2><p>Manage your Upwork connection and workspace preferences.</p></div><UpworkConnection onOpenProfile={()=>{setSelectedPage('upworkprofile');window.scrollTo({top:0,behavior:'auto'});}} /><div className="settings-activity-card"><ActivitySettings timezone={user.timezone ?? 'UTC'} isAdmin={user.is_super_admin} onTimezone={timezone => setUser({...user, timezone})} /></div></div>
+        <div className="workspace-panel settings-page" hidden={activePage !== 'settings'}><div className="settings-intro"><h2 className="heading-with-icon"><AppIcon name="settings"/>Account settings</h2><p>Manage your Upwork connection and workspace preferences.</p></div><UpworkConnection onOpenProfile={()=>{setSelectedPage('upworkprofile');window.scrollTo({top:0,behavior:'auto'});}} /><div className="settings-activity-card"><ActivitySettings timezone={user.timezone ?? 'UTC'} isAdmin={user.is_super_admin} onTimezone={timezone => setUser({...user, timezone})} /></div></div>
         <AdminWorkspace visible={activePage === 'admin'} user={user} canManageUserAccess={user.is_super_admin} canEditUserProfile={user.is_super_admin || Boolean(userPermissions.edit)} userAccessLoading={userAccessLoading} section={adminSection} setSection={section => {setAdminSection(section); if (section === 'audit') void showAudit(auditTarget);}} dark={adminDark} toggleDark={toggleAdminTheme} users={users} roles={roles} teams={teams} catalog={catalog} permissionRole={permissionRole} matrix={matrix} setMatrix={setMatrix} roleName={roleName} setRoleName={setRoleName} teamName={teamName} setTeamName={setTeamName} name={name} setName={setName} email={email} setEmail={setEmail} creatingUser={creatingUser} setCreatingUser={setCreatingUser} newUserTeamId={newUserTeamId} setNewUserTeamId={setNewUserTeamId} newUserRoleId={newUserRoleId} setNewUserRoleId={setNewUserRoleId} editing={editing} setEditing={setEditing} selectedRoles={selectedRoles} setSelectedRoles={setSelectedRoles} overrides={overrides} setOverrides={setOverrides} search={search} setSearch={setSearch} statusFilter={statusFilter} setStatusFilter={setStatusFilter} teamFilter={teamFilter} setTeamFilter={setTeamFilter} roleFilter={roleFilter} setRoleFilter={setRoleFilter} page={page} lastPage={lastPage} userTotal={userTotal} message={message} audit={audit} auditTotal={auditTotal} auditAccessChanges={auditAccessChanges} auditPeople={auditPeople} auditActions={auditActions} auditTitle={auditTitle} auditTarget={auditTarget} setAuditTarget={setAuditTarget} auditPage={auditPage} auditLastPage={auditLastPage} auditFrom={auditFrom} setAuditFrom={setAuditFrom} auditTo={auditTo} setAuditTo={setAuditTo} auditAction={auditAction} setAuditAction={setAuditAction} teamHistoryUser={teamHistoryUser} setTeamHistoryUser={setTeamHistoryUser} teamHistory={teamHistory} onCreateUser={create} onSaveProfile={user.is_super_admin ? saveProfile : saveLimitedProfile} onSearch={event => {event.preventDefault(); run(() => refresh(search, 1));}} onRefresh={refresh} onCreateRole={createRole} onEditPermissions={editPermissions} onSavePermissions={savePermissions} onRenameRole={renameRole} onDeleteRole={deleteRole} onCreateTeam={createTeam} onRenameTeam={renameTeam} onDeleteTeam={deleteTeam} onSetTeamMembership={setTeamMembership} onSetTeamLead={setTeamLead} onManageUser={editUser} onUploadPhoto={uploadPhoto} onShowAudit={showAudit} onClearAuditFilters={clearAuditFilters} onShowTeamHistory={showTeamHistory} onOpenOverrides={openOverrides} onChangeAdmin={changeAdmin} onSendLink={sendLink} onRevoke={revoke} onArchive={archive} onStatusChange={statusChange} onFilterAudit={target => showAudit(target, 1)} /></main></div>;
 }
 createRoot(document.getElementById('app')!).render(<App />);

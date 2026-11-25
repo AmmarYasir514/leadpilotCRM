@@ -1,0 +1,40 @@
+# LeadPilot root ignore rules (added 2026-11-25)
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+auth.json
+*.pem
+*.key
+
+# Databases (never commit live or preview data)
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Dependencies and build output
+node_modules/
+vendor/
+leadpilot-web/public/build/
+leadpilot-web/public/hot
+
+# Logs, caches, test results
+*.log
+leadpilot-web/storage/logs/*
+!leadpilot-web/storage/logs/.gitignore
+.phpunit.result.cache
+.phpunit.cache/
+__pycache__/
+*.pyc
+
+# Dated backup copies (kept on disk, not in Git)
+*_BACKUP_*
+_backups/
+_code_backups/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

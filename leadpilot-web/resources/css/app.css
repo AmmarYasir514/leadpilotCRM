@@ -2039,3 +2039,31 @@ th {
 .admin-dark .admin-team-table td{border-color:#35455c;color:#c4d6ed}
 .admin-dark .admin-team-notice{background:#19372f;border-color:#31594f;color:#c4d6ed}
 @media(max-width:760px){.admin-role-screen .admin-role-layout{grid-template-columns:1fr}.admin-team-filters{align-items:stretch;flex-direction:column}.admin-team-filters input{width:100%}.admin-team-foot{align-items:flex-start;flex-direction:column}.admin-user-drawer .admin-user-dialog-heading{padding:20px 20px 16px}.admin-user-drawer .admin-user-form{padding:16px 20px 22px}.admin-user-drawer .admin-user-access-row{grid-template-columns:1fr}.admin-drawer .admin-user-form-actions{margin-right:-20px;margin-left:-20px;padding:12px 20px}}
+
+.app-icon{width:16px;height:16px;flex:none;display:block;stroke:currentColor}
+.heading-with-icon{display:flex;align-items:center;gap:8px}
+.heading-with-icon .app-icon{width:20px;height:20px;opacity:.9}
+.stat-label,.admin-kpis span,.admin-audit-kpis span,.crm-kpis span,.sales-dash-kpi span{display:flex;align-items:center;gap:6px}
+.report-stat small,.report-channel small{display:flex;align-items:center;gap:6px}
+.admin-subnav button{display:inline-flex;align-items:center;gap:7px}
+.admin-subnav button .app-icon{width:15px;height:15px}
+.action-with-icon{display:inline-flex;align-items:center;gap:6px}
+.empty-with-icon{display:flex;align-items:center;justify-content:center;gap:8px}
+.calendar-search-icon .app-icon,.calendar-date-icon .app-icon{width:15px;height:15px}
+.meeting-connect-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 22px}
+.meeting-connect-card{background:#fff;border:1px solid #dfe8e6;border-radius:13px;padding:18px 20px;box-shadow:0 4px 16px #124c4308}
+.meeting-connect-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.meeting-connect-head img{width:36px;height:36px;object-fit:contain;flex:none}
+.meeting-connect-head h3{margin:0 0 4px;font-size:16px;color:#163a3c}
+.meeting-connect-head p{margin:0;color:#718a8b;font-size:13px}
+.meeting-status{margin-left:auto;flex:none;padding:4px 9px;border-radius:999px;background:#eef3f2;color:#5d7471;font-size:11px;font-weight:700}
+.meeting-status.is-connected{background:#e5f7f0;color:#087c6d}
+.meeting-connect-card .button,.meeting-connect-card a.button{display:inline-flex;align-items:center;justify-content:center}
+.meeting-connect-card small{display:block;margin-top:8px;color:#7b8c8a;font-size:12px}
+.meeting-connect-card p{color:#718a8b;font-size:13px;margin:0}
+.calendar-video-choice{grid-column:1/-1;border:1px solid #d9eee7;border-radius:10px;padding:12px 14px;margin:0;display:grid;gap:8px;background:#f7fbf9}
+.calendar-video-choice legend{padding:0 6px;font-size:12px;font-weight:700;color:#1b4a45}
+.calendar-video-choice label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:13px}
+.calendar-video-choice label.is-disabled{color:#7b8c8a}
+.calendar-video-choice small{color:#8a5a12;font-size:11px;font-weight:650}
+@media(max-width:700px){.meeting-connect-cards{grid-template-columns:1fr}}

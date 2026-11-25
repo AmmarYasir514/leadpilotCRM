@@ -14,6 +14,7 @@ use App\Http\Controllers\EmployeeTargetController;
 use App\Http\Controllers\FollowUpCycleController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\MeetingHistoryController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PortfolioProjectController;
 use App\Http\Controllers\ProfilePhotoController;
@@ -72,6 +73,7 @@ Route::middleware(['auth', EnsureActiveUser::class])->group(function (): void {
     Route::get('/calendar/events', [GoogleCalendarController::class, 'events']);
     Route::post('/calendar/events', [GoogleCalendarController::class, 'createEvent']);
     Route::delete('/calendar/connection', [GoogleCalendarController::class, 'disconnect']);
+    Route::get('/meetings/history', [MeetingHistoryController::class, 'index']);
     Route::get('/deals', [DealController::class, 'index']);
     Route::post('/deals', [DealController::class, 'store']);
     Route::post('/deals/closed', [DealController::class, 'storeClosed']);

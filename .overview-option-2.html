@@ -1,0 +1,70 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;padding:16px;background:#fff}
+  #leadpilot-overview-options { --lp-navy:#1f3d69; --lp-teal:#087d6b; --lp-sidebar:#073f3c; --lp-muted:#75869c; --lp-border:#dfe8f2; --lp-bg:#f3f7f6; --lp-pale:#eff5fd; color:#294768; font:14px/1.45 Inter,ui-sans-serif,system-ui,sans-serif; }
+  #leadpilot-overview-options * { box-sizing:border-box; }
+  #leadpilot-overview-options .app { display:grid; grid-template-columns:190px minmax(0,1fr); min-height:620px; overflow:hidden; border-radius:14px; background:var(--lp-bg); }
+  #leadpilot-overview-options .side { display:flex; flex-direction:column; justify-content:space-between; padding:20px 12px 14px; background:var(--lp-sidebar); color:#e9f4f2; }
+  #leadpilot-overview-options .logo { padding:0 8px 18px; border-bottom:1px solid #ffffff24; font-size:13px; font-weight:800; letter-spacing:.07em; }
+  #leadpilot-overview-options .logo small { display:block; margin-top:4px; color:#b1d4ce; font-size:8px; letter-spacing:.12em; }
+  #leadpilot-overview-options .side-label { margin:18px 8px 7px; color:#a7c8c4; font-size:9px; font-weight:800; letter-spacing:.12em; }
+  #leadpilot-overview-options .side-link { display:block; margin:2px 0; padding:8px; border-radius:7px; color:#d8e7e5; font-size:11px; }
+  #leadpilot-overview-options .side-link.active { background:#118b78; color:#fff; font-weight:700; }
+  #leadpilot-overview-options .account { padding:11px 8px 0; border-top:1px solid #ffffff24; font-size:10px; font-weight:700; }
+  #leadpilot-overview-options .account small { display:block; margin-top:3px; color:#b1d4ce; font-weight:400; }
+  #leadpilot-overview-options .main { min-width:0; padding:24px 28px 28px; }
+  #leadpilot-overview-options .top { display:flex; align-items:center; justify-content:space-between; padding-bottom:16px; border-bottom:1px solid var(--lp-border); }
+  #leadpilot-overview-options .top h1 { margin:5px 0 0; color:var(--lp-navy); font-size:24px; font-weight:550; }
+  #leadpilot-overview-options .eyebrow { color:#8294ad; font-size:9px; font-weight:800; letter-spacing:.12em; }
+  #leadpilot-overview-options .admin { padding:9px 12px; border:1px solid var(--lp-border); border-radius:8px; background:#fff; color:#486286; font-size:10px; font-weight:700; }
+  #leadpilot-overview-options .tabs { display:flex; flex-wrap:wrap; gap:7px; margin:17px 0 21px; }
+  #leadpilot-overview-options .tab { padding:8px 11px; border:1px solid #dce6f3; border-radius:8px; background:var(--lp-pale); color:#36547d; font-size:10px; font-weight:650; white-space:nowrap; }
+  #leadpilot-overview-options .tab.active { border-color:var(--lp-teal); background:var(--lp-teal); color:#fff; }
+  #leadpilot-overview-options .heading { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  #leadpilot-overview-options .heading h2 { margin:3px 0 0; color:var(--lp-navy); font-size:20px; }
+  #leadpilot-overview-options .heading p { margin:4px 0 0; color:var(--lp-muted); font-size:11px; }
+  #leadpilot-overview-options .button { padding:9px 12px; border:0; border-radius:8px; background:var(--lp-teal); color:#fff; font-size:10px; font-weight:750; white-space:nowrap; }
+  #leadpilot-overview-options .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+  #leadpilot-overview-options .stat { padding:12px 13px; border:1px solid var(--lp-border); border-radius:10px; background:#fff; }
+  #leadpilot-overview-options .stat span { display:block; color:var(--lp-muted); font-size:9px; }
+  #leadpilot-overview-options .stat strong { display:block; margin-top:6px; color:var(--lp-navy); font-size:21px; line-height:1; }
+  #leadpilot-overview-options .stat small { display:block; margin-top:5px; color:var(--lp-teal); font-size:9px; }
+  #leadpilot-overview-options .columns { display:grid; grid-template-columns:1.1fr .9fr; gap:12px; }
+  #leadpilot-overview-options .section { min-width:0; padding:14px; border:1px solid var(--lp-border); border-radius:10px; background:#fff; }
+  #leadpilot-overview-options .section h3 { margin:0 0 10px; color:var(--lp-navy); font-size:12px; }
+  #leadpilot-overview-options .section-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  #leadpilot-overview-options .section-head h3 { margin:0; }
+  #leadpilot-overview-options .muted { color:var(--lp-muted); font-size:9px; }
+  #leadpilot-overview-options table { width:100%; border-collapse:collapse; text-align:left; font-size:9px; }
+  #leadpilot-overview-options th { padding:7px 5px; color:#8292a8; font-size:8px; font-weight:750; text-transform:uppercase; }
+  #leadpilot-overview-options td { padding:8px 5px; border-top:1px solid #edf1f6; color:#526883; }
+  #leadpilot-overview-options td:first-child { color:var(--lp-navy); font-weight:650; }
+  #leadpilot-overview-options .badge { display:inline-block; padding:3px 6px; border-radius:99px; background:#e5f5f0; color:#17725f; font-size:8px; font-weight:750; }
+  #leadpilot-overview-options .badge.waiting { background:#fff4df; color:#986a12; }
+  #leadpilot-overview-options .row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 0; border-top:1px solid #edf1f6; color:#526883; font-size:10px; }
+  #leadpilot-overview-options .row b { color:var(--lp-navy); }
+  #leadpilot-overview-options .role-layout { display:grid; grid-template-columns:1.25fr .75fr; gap:12px; }
+  #leadpilot-overview-options .role-table td:last-child { text-align:right; }
+  #leadpilot-overview-options .team-line { padding:10px 0; border-top:1px solid #edf1f6; }
+  #leadpilot-overview-options .team-line strong { color:var(--lp-navy); font-size:10px; }
+  #leadpilot-overview-options .team-line small { display:block; margin-top:3px; color:var(--lp-muted); font-size:9px; }
+  #leadpilot-overview-options .attention { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; padding:9px 10px; border:1px solid #e9edf3; border-radius:8px; background:#fbfcfe; }
+  #leadpilot-overview-options .attention + .attention { margin-top:7px; }
+  #leadpilot-overview-options .attention strong { display:block; color:var(--lp-navy); font-size:10px; }
+  #leadpilot-overview-options .attention small { display:block; margin-top:3px; color:var(--lp-muted); font-size:9px; }
+  #leadpilot-overview-options .event { display:grid; grid-template-columns:62px 1fr; gap:8px; padding:9px 0; border-top:1px solid #edf1f6; font-size:9px; }
+  #leadpilot-overview-options .event time { color:var(--lp-muted); }
+  #leadpilot-overview-options .event strong { display:block; color:var(--lp-navy); font-size:10px; }
+  #leadpilot-overview-options .event small { display:block; margin-top:2px; color:var(--lp-muted); }
+  #leadpilot-overview-options .summary-bar { display:flex; flex-wrap:wrap; gap:0; margin-bottom:13px; border:1px solid var(--lp-border); border-radius:10px; background:#fff; }
+  #leadpilot-overview-options .summary-item { flex:1; min-width:105px; padding:12px 14px; }
+  #leadpilot-overview-options .summary-item + .summary-item { border-left:1px solid #edf1f6; }
+  #leadpilot-overview-options .summary-item strong { display:block; color:var(--lp-navy); font-size:18px; }
+  #leadpilot-overview-options .summary-item span { display:block; margin-top:3px; color:var(--lp-muted); font-size:9px; }
+  #leadpilot-overview-options .timeline { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+  #leadpilot-overview-options .timeline-item { padding:10px; border-left:2px solid #b8dfd4; background:#fbfcfe; }
+  #leadpilot-overview-options .timeline-item strong { display:block; color:var(--lp-navy); font-size:10px; }
+  #leadpilot-overview-options .timeline-item span { display:block; margin-top:4px; color:var(--lp-muted); font-size:9px; }
+  @media(max-width:700px){#leadpilot-overview-options .app{grid-template-columns:1fr}#leadpilot-overview-options .side{display:none}#leadpilot-overview-options .main{padding:17px}#leadpilot-overview-options .stats{grid-template-columns:repeat(2,minmax(0,1fr))}#leadpilot-overview-options .columns,#leadpilot-overview-options .role-layout{grid-template-columns:1fr}}
+  @media(max-width:430px){#leadpilot-overview-options .top h1{font-size:20px}#leadpilot-overview-options .tabs{gap:5px}#leadpilot-overview-options .tab{padding:7px 8px;font-size:9px}#leadpilot-overview-options .heading{align-items:flex-start;flex-direction:column}#leadpilot-overview-options .summary-item{min-width:50%;}#leadpilot-overview-options .summary-item:nth-child(3){border-left:0;border-top:1px solid #edf1f6}#leadpilot-overview-options .summary-item:nth-child(4){border-top:1px solid #edf1f6}#leadpilot-overview-options .timeline{grid-template-columns:1fr}}
+</style></head><body><div id="leadpilot-overview-options"><section data-variant="Action center" aria-label="Action center dashboard">
+    <div class="app"><aside class="side"><div><div class="logo">LEADPILOT CRM<small>YOUR SALES WORKSPACE</small></div><div class="side-label">WORKSPACE</div><span class="side-link">Dashboard</span><span class="side-link">Leads</span><span class="side-link">Clients</span><div class="side-label">SETUP</div><span class="side-link active">Team &amp; access</span></div><div class="account">Demo Admin<small>Administrator</small></div></aside><main class="main"><header class="top"><div><span class="eyebrow">LEADPILOT WORKSPACE</span><h1>Team &amp; access</h1></div><span class="admin">Demo Admin</span></header><nav class="tabs" aria-label="Team and access pages"><span class="tab active">Overview</span><span class="tab">Users</span><span class="tab">Roles &amp; permissions</span><span class="tab">Teams</span><span class="tab">Activity &amp; audit</span></nav><div class="heading"><div><span class="eyebrow">ADMINISTRATION</span><h2>Good morning, Demo Admin</h2><p>Two invitations need follow-up.</p></div><span class="button">+ Add user</span></div><div class="stats"><div class="stat"><span>Active users</span><strong>10</strong><small>Ready to work</small></div><div class="stat"><span>Invitations to follow up</span><strong>2</strong><small>Pending response</small></div><div class="stat"><span>Security changes</span><strong>3</strong><small>This week</small></div><div class="stat"><span>Teams</span><strong>4</strong><small>All organized</small></div></div><div class="columns"><section class="section"><div class="section-head"><h3>Needs your attention</h3><span class="badge waiting">2 pending</span></div><table><thead><tr><th>Person</th><th>Invited</th><th>Status</th></tr></thead><tbody><tr><td>Jordan Miles</td><td>Today</td><td><span class="badge waiting">Waiting</span></td></tr><tr><td>Riley Thompson</td><td>Yesterday</td><td><span class="badge waiting">Waiting</span></td></tr></tbody></table><div style="margin-top:10px" class="muted">Resend an invite from the Users screen when needed.</div></section><section class="section"><h3>Recent admin activity</h3><div class="event"><time>10:42</time><span><strong>Invitation sent</strong><small>Jordan Miles</small></span></div><div class="event"><time>09:18</time><span><strong>Role updated</strong><small>Sales Representative</small></span></div><div class="event"><time>Yesterday</time><span><strong>Team changed</strong><small>Samira Khan  /  Sales</small></span></div></section></div></main></div>
+  </section></div></body></html>

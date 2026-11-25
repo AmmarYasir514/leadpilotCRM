@@ -1,0 +1,54 @@
+<div id="activity-audit-preview">
+  <style>
+    #activity-audit-preview{--background:#f3f8f7;--foreground:#203a5b;--card:#ffffff;--card-foreground:#203a5b;--muted:#f3f7fa;--muted-foreground:#7489a3;--border:#dce5ee;--input:#d4dfeb;--primary:#078675;--primary-foreground:#ffffff;--accent:#e1f3ee;--accent-foreground:#078675;--viz-series-1:#078675;font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:var(--foreground);background:var(--background);padding:20px;max-width:1040px;margin:auto}
+    #activity-audit-preview *{box-sizing:border-box}
+    #activity-audit-preview .shell-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:18px;margin-bottom:18px}
+    #activity-audit-preview .eyebrow{font-size:12px;font-weight:600;letter-spacing:.09em;color:var(--muted-foreground)}
+    #activity-audit-preview h1{font-size:26px;font-weight:500;margin:5px 0 0}
+    #activity-audit-preview .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+    #activity-audit-preview .tab{padding:10px 14px;border-radius:9px;background:var(--muted);color:var(--muted-foreground);font-size:14px;font-weight:500}
+    #activity-audit-preview .tab.active{background:var(--primary);color:var(--primary-foreground)}
+    #activity-audit-preview .panel{padding:24px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--card-foreground)}
+    #activity-audit-preview .title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    #activity-audit-preview h2{font-size:22px;font-weight:500;margin:4px 0}
+    #activity-audit-preview p{font-size:14px;color:var(--muted-foreground);margin:6px 0 0}
+    #activity-audit-preview .btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:9px;padding:10px 14px;background:var(--card);color:var(--foreground);font:500 14px/1.2 Inter,ui-sans-serif,system-ui,sans-serif;white-space:nowrap}
+    #activity-audit-preview .btn-primary{border-color:var(--primary);background:var(--primary);color:var(--primary-foreground)}
+    #activity-audit-preview .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+    #activity-audit-preview .stat{padding:14px 16px;border:1px solid var(--border);border-radius:11px;background:var(--background)}
+    #activity-audit-preview .stat span{display:block;font-size:13px;color:var(--muted-foreground)}
+    #activity-audit-preview .stat strong{display:block;margin-top:5px;font-size:23px;font-weight:500;font-variant-numeric:tabular-nums}
+    #activity-audit-preview .filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end;padding:16px;margin-bottom:18px;border-radius:12px;background:var(--muted)}
+    #activity-audit-preview label{display:grid;gap:6px;font-size:13px;font-weight:500}
+    #activity-audit-preview input,#activity-audit-preview select{width:100%;min-width:0;height:42px;padding:0 11px;border:1px solid var(--input);border-radius:8px;background:var(--card);color:var(--foreground);font:400 14px/1.2 Inter,ui-sans-serif,system-ui,sans-serif}
+    #activity-audit-preview .filter-actions{display:flex;gap:8px;grid-column:1/-1;justify-content:flex-end}
+    #activity-audit-preview .table-wrap{overflow:auto}
+    #activity-audit-preview table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+    #activity-audit-preview th{padding:11px 12px;color:var(--muted-foreground);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap}
+    #activity-audit-preview td{padding:13px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+    #activity-audit-preview .person{display:flex;align-items:center;gap:9px;min-width:150px}
+    #activity-audit-preview .avatar{height:32px;width:32px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-foreground);font-weight:500}
+    #activity-audit-preview .person b{display:block;font-weight:500}
+    #activity-audit-preview .person small{display:block;margin-top:2px;color:var(--muted-foreground)}
+    #activity-audit-preview .event{display:flex;align-items:center;gap:8px;white-space:nowrap}
+    #activity-audit-preview .dot{width:8px;height:8px;border-radius:50%;background:var(--viz-series-1);flex:none}
+    #activity-audit-preview .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;color:var(--muted-foreground);font-size:13px}
+    #activity-audit-preview .pages{display:flex;gap:8px;align-items:center}
+    @media(max-width:760px){#activity-audit-preview{padding:12px}#activity-audit-preview .panel{padding:16px}#activity-audit-preview .stats{gap:8px}#activity-audit-preview .stat{padding:11px}#activity-audit-preview .filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:430px){#activity-audit-preview .shell-head{align-items:flex-start}#activity-audit-preview .stats{grid-template-columns:1fr}#activity-audit-preview .filters{grid-template-columns:1fr}#activity-audit-preview .filter-actions{grid-column:auto;justify-content:flex-start}#activity-audit-preview .title-row{display:block}#activity-audit-preview .title-row .btn{margin-top:14px}}
+  </style>
+  <header class="shell-head"><div><div class="eyebrow">LEADPILOT WORKSPACE</div><h1>Team &amp; access</h1></div><button class="btn" type="button">Demo Admin</button></header>
+  <nav class="tabs" aria-label="Team and access sections"><span class="tab">Overview</span><span class="tab">Users</span><span class="tab">Roles &amp; permissions</span><span class="tab">Teams</span><span class="tab active">Activity &amp; audit</span></nav>
+  <main class="panel">
+    <div class="title-row"><div><div class="eyebrow">SECURITY &amp; HISTORY</div><h2>Activity &amp; audit</h2><p>See who changed access or workspace settings, and when.</p></div><button class="btn" type="button">Download CSV</button></div>
+    <div class="stats"><article class="stat"><span>Events found</span><strong>24</strong></article><article class="stat"><span>Access changes</span><strong>8</strong></article><article class="stat"><span>Events on this page</span><strong>10</strong></article></div>
+    <form class="filters" aria-label="Filter audit activity"><label>From<input type="date" value="2026-11-01"></label><label>To<input type="date" value="2026-11-24"></label><label>Person<select><option>All people</option><option>Jordan Miles</option><option>Samira Khan</option></select></label><label>Activity<select><option>All activity</option><option>User access changed</option><option>Role updated</option><option>Team changed</option></select></label><div class="filter-actions"><button class="btn" type="button">Clear filters</button><button class="btn btn-primary" type="button">Apply filters</button></div></form>
+    <div class="table-wrap"><table><thead><tr><th>Time</th><th>Person</th><th>Activity</th><th>Details</th><th>Changed by</th></tr></thead><tbody>
+      <tr><td>Today, 10:42 AM</td><td><div class="person"><span class="avatar">JM</span><span><b>Jordan Miles</b><small>jordan@leadpilot.io</small></span></div></td><td><span class="event"><i class="dot"></i>User invited</span></td><td>Added to Sales team</td><td>Demo Admin</td></tr>
+      <tr><td>Today, 9:18 AM</td><td><div class="person"><span class="avatar">SK</span><span><b>Samira Khan</b><small>samira@leadpilot.io</small></span></div></td><td><span class="event"><i class="dot"></i>Role changed</span></td><td>Viewer → Sales Manager</td><td>Demo Admin</td></tr>
+      <tr><td>Yesterday, 4:06 PM</td><td><div class="person"><span class="avatar">AR</span><span><b>Ali Raza</b><small>ali@leadpilot.io</small></span></div></td><td><span class="event"><i class="dot"></i>Team updated</span></td><td>Moved to Business Development</td><td>Demo Admin</td></tr>
+      <tr><td>Yesterday, 1:32 PM</td><td><div class="person"><span class="avatar">JM</span><span><b>Jordan Miles</b><small>jordan@leadpilot.io</small></span></div></td><td><span class="event"><i class="dot"></i>Access changed</span></td><td>Leads · Edit · Team</td><td>Samira Khan</td></tr>
+    </tbody></table></div>
+    <footer class="foot"><span>Showing 1–10 of 24 events</span><div class="pages"><button class="btn" type="button">Previous</button><span>Page 1 of 3</span><button class="btn" type="button">Next</button></div></footer>
+  </main>
+</div>
