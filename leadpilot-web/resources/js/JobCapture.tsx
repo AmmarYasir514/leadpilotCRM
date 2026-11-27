@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 export default function JobCapture({onImport}:{onImport:(data:{title:string;description:string;budget:string;skills:string[];posted:string;proposals:string;lastViewed:string;interviewing:string;invitesSent:string;unansweredInvites:string;url:string})=>void}){
- const [url,setUrl]=useState('');const [text,setText]=useState('');const [error,setError]=useState('');const [loading,setLoading]=useState(false);
+ const [url,setUrl]=useState('');const [text,setText]=useState('');const [error,setError]=useState('');const [loading,setLoading]=useState(false);const [manualOpen,setManualOpen]=useState(false);
  function openJob(){try{const u=new URL(url.trim());if(u.protocol!=='https:'||!['upwork.com','www.upwork.com'].includes(u.hostname)||!/^\/(jobs|freelance-jobs\/apply|nx\/search\/jobs\/details)\//i.test(u.pathname))throw new Error('Enter a valid Upwork job link.');window.open(u.toString(),'_blank','noopener,noreferrer');setError('Copy the visible job details, then paste them below.');}catch(e){setError(e instanceof Error?e.message:'Invalid link.');}}
  function parse(input:string, sourceUrl=url){
   const lines=input.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
@@ -49,6 +49,6 @@ export default function JobCapture({onImport}:{onImport:(data:{title:string;desc
   <div className="writer-actions"><button type="button" disabled={loading} onClick={()=>automaticImport()}>{loading?<><span className="import-spinner" aria-hidden="true"/> Importing job...</>:"Import job"}</button><button className="writer-secondary" type="button" onClick={openJob}>Open job only</button></div>
   <p className="writer-hint">Keep your Upwork account signed in in this browser while the job is imported.</p>
   {error&&<p className="writer-notice" role="status">{error}</p>}
-  <details className="writer-manual"><summary>Having trouble? Paste job details manually</summary><p>Copy the job text from Upwork, then paste and extract it here.</p><button className="writer-secondary" type="button" onClick={pasteAndExtract}>Paste and extract job details</button><label>Copied job page<textarea rows={5} maxLength={40000} value={text} onChange={e=>setText(e.target.value)}/></label><button className="writer-secondary" type="button" onClick={()=>parse(text)}>Extract job details</button></details>
+  <details className="writer-manual" open={manualOpen} onToggle={event=>setManualOpen(event.currentTarget.open)}><summary><span>Having trouble? Paste job details manually</span><span className="writer-summary-toggle" aria-label={manualOpen?'Collapse manual paste':'Expand manual paste'}><b>+</b></span></summary><p>Copy the job text from Upwork, then paste and extract it here.</p><button className="writer-secondary" type="button" onClick={pasteAndExtract}>Paste and extract job details</button><label>Copied job page<textarea rows={5} maxLength={40000} value={text} onChange={e=>setText(e.target.value)}/></label><button className="writer-secondary" type="button" onClick={()=>parse(text)}>Extract job details</button></details>
  </div>;
 }

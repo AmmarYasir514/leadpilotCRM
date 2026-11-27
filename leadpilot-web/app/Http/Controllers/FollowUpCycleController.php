@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Authorization\PermissionResolver;
+use App\Services\FollowUpScheduler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -11,7 +12,7 @@ use Illuminate\Validation\Rule;
 
 class FollowUpCycleController extends Controller
 {
-    private const STAGES = ['Chat started', 'Proposal sent, awaiting response', 'Meeting requested, no reply yet', 'Meeting booked', 'Contract offer, awaiting offer from client', 'Offer sent, awaiting acceptance'];
+    private const STAGES = FollowUpScheduler::STAGES;
 
     private function lead(Request $request, int $id, bool $edit = false): object
     {
@@ -63,7 +64,7 @@ class FollowUpCycleController extends Controller
         $visible = $resolver->constrain(DB::table('leads')->where('organization_id', $actor->organization_id)->whereNull('archived_at')->whereNotIn('status', ['won', 'lost', 'dead']), $actor, 'leads', 'view', $actor->organization_id)->select('id');
         $cycles = DB::table('follow_up_cycles')->join('leads', 'leads.id', '=', 'follow_up_cycles.lead_id')
             ->where('follow_up_cycles.organization_id', $actor->organization_id)->whereIn('leads.id', $visible)
-            ->where('follow_up_cycles.stage', '<>', 'Meeting booked')
+            ->whereNotIn('follow_up_cycles.stage', FollowUpScheduler::PAUSED_STAGES)
             ->whereNotExists(function ($query): void {
                 $query->selectRaw('1')->from('deals')->whereColumn('deals.lead_id', 'leads.id')->whereColumn('deals.organization_id', 'leads.organization_id')->whereIn('deals.status', ['won', 'lost']);
             })
@@ -91,7 +92,8 @@ class FollowUpCycleController extends Controller
         $closed = in_array($lead->status, ['won', 'lost', 'dead'], true) || DB::table('deals')->where('organization_id', $lead->organization_id)->where('lead_id', $id)->whereIn('status', ['won', 'lost'])->exists();
         $cycle->cadence = $cadence;
         $cycle->closed = $closed;
-        $cycle->due_at = (! $closed && $cycle->stage !== 'Meeting booked' && $cycle->completed < count($cadence)) ? Carbon::parse($cycle->anchor_at, 'UTC')->addHours($cadence[$cycle->completed])->toIso8601String() : null;
+        $cycle->paused = FollowUpScheduler::isPaused($cycle->stage);
+        $cycle->due_at = FollowUpScheduler::dueAt($cycle, $closed)?->toIso8601String();
 
         return response()->json(['cycle' => $cycle, 'events' => $events]);
     }
@@ -118,7 +120,7 @@ class FollowUpCycleController extends Controller
                     $changes['completed'] = min($cycle->completed, count($data['cadence']));
                 }
                 if ($action === 'sent') {
-                    abort_if($cycle->stage === 'Meeting booked' || $cycle->completed >= count(json_decode($cycle->cadence, true)), 422, 'No follow-up is currently scheduled.');
+                    abort_if(FollowUpScheduler::isPaused($cycle->stage) || $cycle->completed >= count(json_decode($cycle->cadence, true)), 422, 'No follow-up is currently scheduled.');
                     $changes['completed'] = $cycle->completed + 1;
                     $changes['anchor_at'] = now();
                 }
@@ -126,12 +128,16 @@ class FollowUpCycleController extends Controller
                     $changes['completed'] = 0;
                     $changes['anchor_at'] = now();
                 }
-                if ($action === 'stage') {
+                if ($action === 'stage' && $data['stage'] !== $cycle->stage) {
                     $changes['stage'] = $data['stage'];
                     $changes['completed'] = 0;
                     $changes['anchor_at'] = now();
                 }
                 $query->update($changes);
+            }
+            app(FollowUpScheduler::class)->refresh($lead->organization_id, $id);
+            if ($action === 'stage' && $data['stage'] === $cycle->stage) {
+                return; // Same stage chosen again: nothing changed, so nothing is logged (desktop fu_change_stage returns early).
             }
             DB::table('follow_up_events')->insert(['organization_id' => $lead->organization_id, 'lead_id' => $id, 'actor_id' => $request->user()->id, 'action' => $action, 'note' => $data['note'] ?? null, 'created_at' => now()]);
         });

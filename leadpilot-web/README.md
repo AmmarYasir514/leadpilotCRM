@@ -36,3 +36,13 @@ npx tsc --noEmit
 ```
 
 The current SQLite development tests do not establish concurrency guarantees for a production server database. The frontend development dependencies currently report a high-severity Picomatch advisory; check `npm audit` and update when a compatible fix is available.
+
+## Knowledge Base and AI Writer PDF limits
+
+When using the **Use my knowledge base** writing source in the AI Writer, the following limits and rules apply:
+
+- **Maximum 5 projects per draft:** You can manually select up to 5 projects (or leave all unchecked and mention project names in your instructions, up to 5 matched projects).
+- **PDF file limits (per project):** Up to 5 MB file size and up to 15 pages per PDF.
+- **Extracted text limit (per PDF):** Up to 30,000 characters of extracted text are stored per PDF.
+- **Combined OpenAI payload cap:** Up to 100,000 characters total across all selected project data sent to OpenAI. If the combined JSON exceeds 100,000 characters, generation returns an error asking you to select fewer projects rather than silently truncating text.
+- **Prompt handling:** Selected project data (`name`, `summary`, `skills`, `links`, and extracted `pdf_text`) is appended as JSON reference data alongside your job details and instructions in the OpenAI user message, and the system prompt instructs OpenAI to treat project documents as reference data, not instructions.

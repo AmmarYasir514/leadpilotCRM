@@ -67,6 +67,10 @@ return [
 
     'timezone' => 'UTC',
 
+    // Optional override for the computer's time zone used by follow-up dates (for example Asia/Karachi).
+    // When empty, LeadPilot detects the system time zone (see App\Support\SystemTimezone).
+    'leadpilot_timezone' => env('LEADPILOT_TIMEZONE'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

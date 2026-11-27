@@ -15,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 
 class AiWriterController extends Controller
 {
+    public const MAX_STYLE_PROMPT_LENGTH = 8000;
+
     private function authorizeWriter(Request $request): void
     {
         $user = $request->user();
@@ -31,13 +33,13 @@ class AiWriterController extends Controller
         $this->authorizeWriter($request);
         $settings = $this->settings($request);
 
-        return response()->json(['has_key' => (bool) $settings?->encrypted_key, 'style_prompt' => $settings?->style_prompt ?? '', 'model' => $settings?->model ?? 'gpt-4o-mini']);
+        return response()->json(['has_key' => (bool) $settings?->encrypted_key, 'style_prompt' => $settings?->style_prompt ?? '', 'style_prompt_max_length' => self::MAX_STYLE_PROMPT_LENGTH, 'model' => $settings?->model ?? 'gpt-4o-mini']);
     }
 
     public function update(Request $request): JsonResponse
     {
         $this->authorizeWriter($request);
-        $data = $request->validate(['api_key' => ['nullable', 'string', 'min:20', 'max:300', 'regex:/^sk-[A-Za-z0-9_-]+$/'], 'remove_key' => ['sometimes', 'boolean'], 'style_prompt' => ['nullable', 'string', 'max:8000'], 'model' => ['required', 'string', 'max:80', 'regex:/^[A-Za-z0-9._-]+$/']]);
+        $data = $request->validate(['api_key' => ['nullable', 'string', 'min:20', 'max:300', 'regex:/^sk-[A-Za-z0-9_-]+$/'], 'remove_key' => ['sometimes', 'boolean'], 'style_prompt' => ['nullable', 'string', 'max:'.self::MAX_STYLE_PROMPT_LENGTH], 'model' => ['required', 'string', 'max:80', 'regex:/^[A-Za-z0-9._-]+$/']]);
         $fields = ['style_prompt' => $data['style_prompt'] ?? null, 'model' => $data['model'], 'updated_at' => now()];
         if (! empty($data['api_key'])) {
             $fields['encrypted_key'] = Crypt::encryptString($data['api_key']);
